@@ -64,7 +64,7 @@ jobs:
           INCOMING=$(git log --oneline upstream/main ^HEAD)
           if [[ -z "$INCOMING" ]]; then
             echo "up_to_date=true" >> "$GITHUB_OUTPUT"
-            echo "### 上游已是最新" >> "$GITHUB_STEP_SUMMARY"
+            echo "### 上游已是最新，无事可做" | tee -a "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
 
@@ -107,7 +107,12 @@ jobs:
             echo "重新贴回去。冲突的根因是上游改了功能结构、我们把同一行包进了 L10n，"
             echo "两边做的是不同的事——保留 ours 会丢掉上游的功能，所以取上游。"
             echo "代价只是那几处界面显示英文，之后补翻译即可。"
-          } >> "$GITHUB_STEP_SUMMARY"
+          } | tee "$RUNNER_TEMP/report.md" | tee -a "$GITHUB_STEP_SUMMARY"
+
+          # 同一份内容也打到 stdout：run summary 要点开网页才看得到，
+          # 而日志在 `gh run view --log` 里直接能读。定时任务没人盯着
+          # 网页时，日志才是唯一能一眼看懂的地方。
+          cat "$RUNNER_TEMP/report.md"
 
       # 上次提醒还没人处理时，不重复开 Issue —— 否则每天一条，很快就把
       # 通知变成噪音，那还不如不提醒。改成在原 Issue 上留一条评论。
