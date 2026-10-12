@@ -782,6 +782,17 @@
         }
       }
     },
+    "Black canvas": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "黑色画布"
+          }
+        }
+      }
+    },
     "Black · Hide": {
       "extractionState": "manual",
       "localizations": {
@@ -6062,6 +6073,17 @@
         }
       }
     },
+    "Millimeters": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "毫米"
+          }
+        }
+      }
+    },
     "Mixer": {
       "extractionState": "manual",
       "localizations": {
@@ -10033,6 +10055,17 @@
         }
       }
     },
+    "Transparent canvas": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "透明画布"
+          }
+        }
+      }
+    },
     "Trim": {
       "extractionState": "manual",
       "localizations": {
@@ -10546,6 +10579,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "白平衡选择器"
+          }
+        }
+      }
+    },
+    "White canvas": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "白色画布"
           }
         }
       }
