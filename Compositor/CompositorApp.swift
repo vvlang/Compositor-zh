@@ -100,12 +100,12 @@ struct CompositorApp: App {
                         .configuredKeyboardShortcut("s", modifiers: [.command, .shift])
                         .disabled(session.document == nil || !applicationDelegate.projects.canStart)
                     Divider()
-                    Button("Export PNG…") { Task { await applicationDelegate.projects.exportPNG() } }
-                        .configuredKeyboardShortcut("e", modifiers: [.command, .shift])
-                        .disabled(session.document == nil || !applicationDelegate.projects.canStart)
                     // Export As on JPEG.
                     Button("Export JPEG…") { Task { await applicationDelegate.projects.exportAs(start: .jpeg) } }
                         .configuredKeyboardShortcut("s", modifiers: [.command, .option, .shift])
+                        .disabled(session.document == nil || !applicationDelegate.projects.canStart)
+                    Button("Export PNG…") { Task { await applicationDelegate.projects.exportPNG() } }
+                        .configuredKeyboardShortcut("e", modifiers: [.command, .shift])
                         .disabled(session.document == nil || !applicationDelegate.projects.canStart)
                     // PNG, JPEG or PDF, sized and previewed; ⌥⇧⌘W, as Photoshop's Export As.
                     Button("Export As…") { Task { await applicationDelegate.projects.exportAs() } }
@@ -122,8 +122,9 @@ struct CompositorApp: App {
                 Group {
                     CommandGroup(after: .appInfo) {
                         // 上游没有 About 面板，SwiftUI 也不会自动补一个，所以「关于」得自己加。
+                        // 更新检查沿用上游新的无参 API。
                         Button("About Compositor") { AboutPanel.show() }
-                        Button("Check for Updates…") { applicationDelegate.updater.checkForUpdates(nil) }
+                        Button("Check for Updates…") { applicationDelegate.updater.checkForUpdates() }
                     }
                     CommandGroup(after: .toolbar) {
                         Button("Search Commands…") {
@@ -230,7 +231,10 @@ struct CompositorApp: App {
                     Button("Copy Merged") { session.copyMergedSelection() }
                         .configuredKeyboardShortcut("c", modifiers: [.command, .shift]).disabled(!session.canCopyMerged)
                     Button("Paste") {
-                        if NSApp.keyWindow?.firstResponder is NSTextView { NSApp.sendAction(#selector(NSText.paste(_:)), to: nil, from: nil) }
+                        // On the New canvas screen an image on the clipboard makes the canvas, even with a size field
+                        // being typed in; a size copied as text still goes into the field.
+                        if session.canPasteImageAsNewCanvas { Task { await session.pasteImageAsNewCanvas() } }
+                        else if NSApp.keyWindow?.firstResponder is NSTextView { NSApp.sendAction(#selector(NSText.paste(_:)), to: nil, from: nil) }
                         else if applicationDelegate.workspace.pasteCopiedLayer() { }
                         else if session.canPaste { session.paste() }
                         else { NSSound.beep() }

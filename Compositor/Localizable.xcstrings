@@ -155,6 +155,28 @@
         }
       }
     },
+    "16 bits per channel": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每通道 16 位"
+          }
+        }
+      }
+    },
+    "16-bit layer: keeps 16 bits a channel": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16 位图层：每通道保留 16 位"
+          }
+        }
+      }
+    },
     "3 by 3 Average": {
       "extractionState": "manual",
       "localizations": {
@@ -892,6 +914,17 @@
         }
       }
     },
+    "Blur only the colors, keeping the layer's outline and transparency as they are": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "只模糊颜色，图层轮廓与透明度保持原样"
+          }
+        }
+      }
+    },
     "Boost": {
       "extractionState": "manual",
       "localizations": {
@@ -958,6 +991,17 @@
         }
       }
     },
+    "Brighter than white kept · Transparency kept": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保留超白高光 · 保留透明度"
+          }
+        }
+      }
+    },
     "Brightness added by this wheel.": {
       "extractionState": "manual",
       "localizations": {
@@ -965,6 +1009,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "此色轮增加的明度。"
+          }
+        }
+      }
+    },
+    "Brings back detail in bright areas the camera partly clipped": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "找回相机部分截断的高光区域里的细节"
           }
         }
       }
@@ -2483,6 +2538,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "密度"
+          }
+        }
+      }
+    },
+    "Depth": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "深度"
           }
         }
       }
@@ -4049,6 +4115,17 @@
         }
       }
     },
+    "HDR layer: keeps light brighter than white, shown as white": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HDR 图层：保留比白色更亮的高光，显示时压到白色"
+          }
+        }
+      }
+    },
     "HSL": {
       "extractionState": "manual",
       "localizations": {
@@ -4320,6 +4397,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "高光优先保护明亮边缘；颜色优先还会同时降低饱和度；绘制叠加则均匀覆盖边缘。"
+          }
+        }
+      }
+    },
+    "Highlight Recovery": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "高光恢复"
           }
         }
       }
@@ -4918,6 +5006,28 @@
         }
       }
     },
+    "Install Update": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安装更新"
+          }
+        }
+      }
+    },
+    "Install and Relaunch": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安装并重新启动"
+          }
+        }
+      }
+    },
     "Inverse": {
       "extractionState": "manual",
       "localizations": {
@@ -4969,6 +5079,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "反相像素 / 蒙版"
+          }
+        }
+      }
+    },
+    "Keep the 16-bit layers' full precision, in a file about twice the size": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保留 16 位图层的完整精度，文件约为两倍大小"
           }
         }
       }
@@ -5974,6 +6095,17 @@
         }
       }
     },
+    "More formats": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更多格式"
+          }
+        }
+      }
+    },
     "More ink (darker) or less before dithering": {
       "extractionState": "manual",
       "localizations": {
@@ -6513,6 +6645,17 @@
         }
       }
     },
+    "Not available for this camera": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此相机不支持"
+          }
+        }
+      }
+    },
     "Nudge Down 1 px": {
       "extractionState": "manual",
       "localizations": {
@@ -6975,6 +7118,17 @@
         }
       }
     },
+    "Other formats: PDF%@": {
+      "extractionState": "extracted",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "其他格式：PDF%@"
+          }
+        }
+      }
+    },
     "Outer Glow": {
       "extractionState": "manual",
       "localizations": {
@@ -7290,6 +7444,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "保留明度"
+          }
+        }
+      }
+    },
+    "Preserve Transparency": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保留透明度"
           }
         }
       }
@@ -7895,6 +8060,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "删除控制点"
+          }
+        }
+      }
+    },
+    "Removes the lens's distortion and vignetting": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "去除镜头的畸变与暗角"
           }
         }
       }
@@ -9043,6 +9219,17 @@
         }
       }
     },
+    "Smooths grain, at the cost of fine detail": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "平滑噪点，代价是损失细节"
+          }
+        }
+      }
+    },
     "Smudge": {
       "extractionState": "manual",
       "localizations": {
@@ -9571,6 +9758,17 @@
         }
       }
     },
+    "This file has no lens profile": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此文件没有镜头配置文件"
+          }
+        }
+      }
+    },
     "Three-Way": {
       "extractionState": "manual",
       "localizations": {
@@ -10029,6 +10227,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "未命名"
+          }
+        }
+      }
+    },
+    "Untitled %@": {
+      "extractionState": "extracted",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未命名 %@"
           }
         }
       }
