@@ -98,29 +98,31 @@ Open `Compositor.xcodeproj` and run the **Compositor** scheme.
 
 ### GitHub Actions (what this fork uses day to day)
 
-A push to `main` builds the DMG on its own — there is nothing to run by hand. The
-build lands in two places:
+A push to `main` builds the DMG on its own — there is nothing to run by hand.
 
-| Where | What | Kept |
+**Each version gets its own Release**, and the asset name carries the version too:
+
+| Where | What | Behaviour |
 |---|---|---|
-| Release `latest` | `Compositor-<version>.dmg` | Always, but **overwritten on every push** |
+| Release `v<version>` | `Compositor-<version>.dmg` | New version → new Release; same version → just that one attachment is replaced |
 | Actions artifact | the same DMG | 90 days, one per push |
 
-`latest` is a rolling channel: the attachment is overwritten on every push, but the
-`latest` tag itself keeps pointing at **the commit that created it**. To tell which
-build a given DMG came from, read the commit and SHA-256 in the release notes — both
-are refreshed with the asset. Consecutive pushes to `main` cancel the earlier build,
-so only the last one survives.
+So "download the latest" is just the top entry on the
+[Releases](https://github.com/vvlang/Compositor-zh/releases) page — one row per
+version, no picking between a pile of DMGs.
 
-Tag a commit to pin a version:
+Earlier this fork let `latest` hold the asset. `--clobber` only replaces a file of the
+same name and the name carried the version, so every release left its old DMG behind
+(1.4.8, 1.4.10 and 1.5.1 all at once) and there was no telling which one to download.
+Splitting by version removes the problem entirely.
+
+To pin a particular build, tag it:
 
 ```bash
-git tag v1.4.9 && git push origin v1.4.9
+git tag v1.5.1-build2 && git push origin v1.5.1-build2
 ```
 
-That publishes a pre-release under the version number, and **an already-published
-version is never overwritten** — re-pushing the tag still builds, but the publish step
-skips.
+That publishes a Release named after the tag, alongside the version-numbered one.
 
 CI also runs `Verify › localization` (`scripts/audit-localization.sh`). Localization
 problems don't turn the build red — a missing key just silently shows English — so a

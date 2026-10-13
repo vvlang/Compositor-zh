@@ -6,15 +6,20 @@ name: Release
 # 密钥不能进仓库；这份用 ad-hoc 签名（不需要任何凭据），代价是没有公证，
 # 用户首次打开要手动放行一次 Gatekeeper。README 的「如何绕过 Gatekeeper」一节有说明。
 #
-# 两种触发，走两条路：
+# 每个版本一个自己的 Release，附件也带版本号，互不干扰：
 #
-#   推到 main → 重新构建，附件覆盖到固定的 `latest` Release，同时留一份 Actions artifact。
-#               版本号不用动，随时能下载到最新构建，也不会堆出一串 Release。
+#   推到 main → 按 MARKETING_VERSION 发布/更新 `v<版本>`，同名附件用 --clobber
+#               覆盖。版本号变了就是新 Release，版本号没变就只换那一份附件。
+#               每次推送只动一个 Release，不会越堆越多。
 #
-#   打 v* tag → 按版本号发一个正式的 pre-release。这一条是给「想固定某个版本」用的。
-#               已经发过的版本不会被覆盖。
+#   打 v* tag → 发布一个按 tag 命名的 Release，用于固定某个构建。
 #
-#   手动触发 → 等同打 tag，但版本号从 MARKETING_VERSION 读。
+#   手动触发 → 等同推 main，只是由人触发。
+#
+# `latest` 只作指针：它不带附件，只在说明里写明当前版本下载哪个。
+# 早先的做法是让 `latest` 持有附件，结果每次升版本都留下一个旧 DMG
+# （--clobber 只覆盖同名文件），下载页会同时列出一堆 1.4.8 / 1.4.10 / 1.5.1，
+# 读者根本不知道该下哪个。
 on:
   push:
     branches:
@@ -63,44 +68,39 @@ jobs:
             -configuration Release -showBuildSettings 2>/dev/null)
           version=$(printf '%s\n' "$settings" | awk -F' = ' '/ MARKETING_VERSION = /{print $2; exit}')
           echo "version=$version" >> "$GITHUB_OUTPUT"
-          # main 推送走 latest（永远覆盖）；打 tag 时沿用触发它的 tag；
-          # 手动触发时用版本号拼一个。
-          if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
-            echo "tag=latest" >> "$GITHUB_OUTPUT"
-            echo "rolling=true" >> "$GITHUB_OUTPUT"
-          elif [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+          # 打 tag 时沿用触发它的 tag；其余情况按 MARKETING_VERSION 发布，
+          # 于是「同一个版本号」永远是同一个 Release，附件用 --clobber 覆盖。
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
             echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
           else
             echo "tag=v$version" >> "$GITHUB_OUTPUT"
           fi
 
-      # 按版本号发布时，已经发过的版本直接跳过，避免覆盖已发布的资产。
-      # 两种 tag 写法都查：仓库里同时存在 `1.4.5` 和 `v1.4.5`，
-      # 只认一种会漏掉另一种，结果就是同一个版本发出两个 Release。
-      # latest 是滚动渠道，不受这个限制。
-      - name: Skip if this version is already published
+      # 每个版本一个 Release，所以「这个 tag 名被别的东西占了」才是问题——
+      # 比如有人在 main 上直接 `git tag 1.4.6`（不带 v），而历史上真发过
+      # `v1.4.6`，两个 Release 会指向同一个下载页，读者分不清。
+      # Release 自己不存在时（绝大多数情况）不需要这一步。
+      - name: Check whether the tag name is already taken
         id: existing
-        if: steps.version.outputs.rolling != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.version.outputs.tag }}
-          VERSION: ${{ steps.version.outputs.version }}
         run: |
-          for candidate in "$TAG" "$VERSION" "v$VERSION"; do
-            if gh release view "$candidate" --repo "${{ github.repository }}" >/dev/null 2>&1; then
-              echo "Release $candidate already exists — nothing to do."
-              echo "skip=true" >> "$GITHUB_OUTPUT"
-              exit 0
-            fi
-          done
+          if gh release view "$TAG" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            echo "Release $TAG 已存在，将更新它的附件。"
+          elif git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            echo "⚠ tag $TAG 已存在但没有对应的 Release。"
+            echo "  再发一个会让同一个下载页出现两条记录。请先删掉那个 tag，或"
+            echo "  改 MARKETING_VERSION 让版本号继续往前走。"
+            echo "blocked=true" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
 
       - name: Upload the DMG
-        if: steps.existing.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.version.outputs.tag }}
           VERSION: ${{ steps.version.outputs.version }}
-          ROLLING: ${{ steps.version.outputs.rolling }}
           SHA: ${{ github.sha }}
           DMG: dist/Compositor-${{ steps.version.outputs.version }}.dmg
         run: |
@@ -109,13 +109,6 @@ jobs:
           {
             echo "由 GitHub Actions 自动构建的 ad-hoc 签名版本。"
             echo
-            if [[ "$ROLLING" == "true" ]]; then
-              echo "**这是滚动渠道**：附件每次推送到 \`main\` 都会被覆盖。"
-              echo "（\`latest\` 这个 tag 始终指向第一次创建它的那次提交；"
-              echo "下面这两行随附件一起刷新，是判断版本的依据。）"
-              echo "需要固定版本请用版本号 tag 的 Release。"
-              echo
-            fi
             echo "**首次打开需要手动放行**：该构建没有 Apple Developer ID 签名，也没有公证，Gatekeeper 会拦截。"
             echo "在 Finder 里右键点击 app → 打开，或运行："
             echo
@@ -123,21 +116,19 @@ jobs:
             echo "xattr -dr com.apple.quarantine /Applications/Compositor.app"
             echo '```'
             echo
+            echo "- 版本：$VERSION"
             echo "- SHA-256：\`$checksum\`"
             echo "- 构建自提交：\`$SHA\`"
+            echo
+            echo "同一个版本号每次推送只会替换这一份附件，历史版本各占一个 Release，"
+            echo "不会互相覆盖。"
           } > notes.md
 
           title="Compositor $VERSION 中文版"
-          [[ "$ROLLING" == "true" ]] && title="Compositor 中文版（最新构建）"
 
           if gh release view "$TAG" --repo "${{ github.repository }}" >/dev/null 2>&1; then
-            # 覆盖附件并刷新说明。
-            #
-            # 刻意不去移动 tag：latest 这个 tag 会一直指着第一次创建它的提交，
-            # 而附件早就换成新的了。要确认某个 DMG 到底是哪次构建的，看说明里的
-            # 「构建自提交」和 SHA-256 就行 —— 那是随附件一起刷新的。
-            # 强推 tag 换来的只是「tag 指向最新」这一点 cosmetic 上的好处，
-            # 代价是在公开仓库上改写历史，万一推错很难收拾。
+            # 同版本重推：只换这一份附件。附件名带版本号，所以 --clobber
+            # 覆盖的正是同一个版本——不会像早先的 `latest` 那样越积越多。
             gh release upload "$TAG" "$DMG" --clobber --repo "${{ github.repository }}"
             gh release edit "$TAG" --title "$title" --notes-file notes.md --repo "${{ github.repository }}"
           else
@@ -152,7 +143,6 @@ jobs:
       # 留一份 Actions artifact：Release 附件被覆盖后，之前的构建就找不回来了，
       # 而 artifact 按 run 保留，事后还能翻出某一版。
       - name: Upload DMG as artifact
-        if: steps.existing.outputs.skip != 'true'
         uses: actions/upload-artifact@v7
         with:
           name: Compositor-${{ steps.version.outputs.version }}.dmg
@@ -165,16 +155,11 @@ jobs:
         env:
           TAG: ${{ steps.version.outputs.tag }}
           VERSION: ${{ steps.version.outputs.version }}
-          SKIPPED: ${{ steps.existing.outputs.skip }}
         run: |
           {
             echo "### Release $TAG"
             echo
-            if [[ "$SKIPPED" == "true" ]]; then
-              echo "该版本已发布过，本次跳过。"
-            elif [[ -n "${VERSION}" ]]; then
-              echo "- 版本：$VERSION"
-            fi
+            [[ -n "${VERSION}" ]] && echo "- 版本：$VERSION"
             if [[ -f "dist/Compositor-${VERSION}.dmg" ]]; then
               echo "- SHA-256：\`$(shasum -a 256 "dist/Compositor-${VERSION}.dmg" | cut -d' ' -f1)\`"
               echo "- 大小：$(du -h "dist/Compositor-${VERSION}.dmg" | cut -f1)"

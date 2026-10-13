@@ -249,23 +249,32 @@ is structurally impossible — only `origin` accepts pushes.
 
 ### GitHub Actions（日常用的就是这条）
 
-推送到 `main` 就会自动构建，**不用手动操作**。产物有两个去处：
+推送到 `main` 就会自动构建，**不用手动操作**。
 
-| 去处 | 内容 | 保留 |
+**每个版本各占一个 Release**，附件也带版本号，互不干扰：
+
+| 去处 | 内容 | 行为 |
 |---|---|---|
-| Release `latest` | `Compositor-<version>.dmg` | 一直有，但**每次推送都被覆盖** |
+| Release `v<版本>` | `Compositor-<版本>.dmg` | 版本号变了 → 新建 Release；没变 → 只替换这一个附件 |
 | Actions artifact | 同一份 DMG | 90 天，每次推送各存一份 |
 
-`latest` 是滚动渠道：附件每次推送都会被覆盖，但 `latest` 这个 tag 始终指向**第一次创建它的那次提交**。想知道手上的 DMG 到底是哪次构建的，看 Release 说明里的「构建自提交」和 SHA-256 —— 两者都随附件一起刷新。main 上连续推送时，前一次构建会被取消（`cancel-in-progress`），只保留最后一次。
+于是「下载最新版」永远是：去 [Releases](https://github.com/vvlang/Compositor-zh/releases)
+看最上面那个 Release，页面干净——每个版本一行，不用在一堆 DMG 里挑。
 
-需要固定某个版本时打 tag：
+早先的做法是让 `latest` 持有附件，`--clobber` 只覆盖同名文件，附件名里却带着版本号，
+所以每升一次版本就留下一个旧的（1.4.8 / 1.4.10 / 1.5.1 同时挂着），读者根本不知道该下哪个。
+现在按版本分开，这个问题就不存在了。
+
+想知道手上的 DMG 到底是哪次构建的，看该 Release 说明里的「构建自提交」和 SHA-256。
+main 上连续推送时，前一次构建会被取消（`cancel-in-progress`），只保留最后一次。
+
+需要固定某次构建时打 tag：
 
 ```bash
-git tag v1.4.9 && git push origin v1.4.9
+git tag v1.5.1-build2 && git push origin v1.5.1-build2
 ```
 
-这会发出一个按版本号的 pre-release，且**已发过的版本不会被覆盖**——
-同一个 tag 再推一次，构建照跑，但发布那步会跳过。
+这会发出一个按 tag 命名的 Release，与按版本号发布的那份并存。
 
 CI 里还有一步 `Verify › localization`，跑 `scripts/audit-localization.sh`。
 本地化的问题不会让编译变红（漏翻的键只是静默显示英文），所以单独一个 job 守着它。
