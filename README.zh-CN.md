@@ -33,9 +33,8 @@ brew install --cask robbietilton-compositor
 
 > 如果你用的是**上游官方发布版**，跳过这一节——它有 Developer ID 签名并已公证，开箱即用。
 
-本仓库提供的 `dist/Compositor-<version>.dmg` 是用 `scripts/package-adhoc-dmg.sh` 构建的，
-**没有 Apple 开发者证书**（ad-hoc 签名，也未经公证）。因此 Gatekeeper 会拦截它，
-双击打开会提示：
+本仓库提供的 DMG **没有 Apple 开发者证书**（ad-hoc 签名，未经公证）。
+因此 Gatekeeper 会拦截它，双击打开会提示：
 
 > 「无法验证开发者」／「Compositor 已损坏，无法打开」
 
@@ -71,14 +70,7 @@ xattr -dr com.apple.provenance /Applications/Compositor.app
 
 > 如果这一项是灰的，说明你还没先尝试过打开它——Gatekeeper 会在你尝试打开之后才把按钮放出来。
 
-**自己重新构建的话**，用仓库里的脚本即可，它已经把 ad-hoc 重签一并做好了：
 
-```sh
-bash scripts/package-adhoc-dmg.sh
-```
-
-> 补充：`scripts/release.sh`（上游原版）需要 Developer ID 证书与公证凭据，
-> 没有证书时用不了，别在这条路上浪费时间。
 
 ## 功能特性
 
@@ -145,10 +137,6 @@ bash scripts/package-adhoc-dmg.sh
 - Apple Silicon Mac，macOS 26.0 或更高版本
 - Xcode 26 或更高版本（从源码构建时需要）
 
-## 构建
-
-打开 `Compositor.xcodeproj` 并运行 **Compositor** scheme。
-
 ## Simplified Chinese Localization
 
 > 🌐 [简体中文](README.md#translations) ｜ English (current file)
@@ -199,118 +187,6 @@ to decline them:
 | `UI/KeyboardShortcuts.swift` | `id = "\(group):\(title)"`, and `group` is also compared in logic | `id` and comparisons stay English; new `displayTitle` / `displayGroup` for display |
 | `Document/DocumentHistory.swift` | `beginEdit(_ name: String)` | parameter becomes `String.LocalizationValue`; undo names resolve on read |
 | `ContentView.swift` | a ~2,700-character nested ternary for the status hint | rewritten as a `switch`, each branch localized |
-
-### Helper scripts
-
-```sh
-python3 scripts/gen-xcstrings.py      # rescan the source, regenerate the catalog skeleton
-bash    scripts/audit-localization.sh # verify catalog keys still match the source
-bash    scripts/package-adhoc-dmg.sh   # build an ad-hoc signed DMG (no certificate, no notarization)
-```
-
-### Commit history
-
-The work is split into topic-scoped commits so upstream can cherry-pick what it wants, or
-revert a group wholesale:
-
-```
-b187379  prepare for localization without changing behavior   ← pure refactor, upstream-friendly
-b6250d3  route display sites through the catalog
-ba82f1d  localize the interface in Simplified Chinese         ← the bulk of the work
-dc2ddca  catch the strings the first pass missed
-15786f8  translate documentation to Simplified Chinese
-```
-
-Comment translation **is on `main`**, merged in from the `l10n-comments` branch. It
-rewrites the comments in 10 core files, and those are precisely the ones that collide
-with upstream hardest (`EditorCanvas.swift` alone accounts for 677 changed lines) while
-contributing nothing at runtime — so every upstream sync now faces roughly twice the
-conflict surface it would without it.
-
-> To go back to the lighter "Chinese UI, English comments" version, revert the single
-> `--no-ff` merge commit on top of `4d81eb5`. The merge is deliberately its own commit,
-> so it can be dropped without touching the localization work itself. The
-> `l10n-comments` branch is still there too.
-
-### Syncing a new upstream release
-
-```sh
-git fetch upstream
-git checkout -b sync/1.5.0 upstream/main
-git rebase sync/1.5.0 main
-
-# After resolving conflicts, always run these two — when upstream adds English copy that
-# has no matching key in the catalog, SwiftUI silently falls back to the English literal
-# and raises no error. Only the audit script can find it:
-python3 scripts/gen-xcstrings.py       # rescan the source, add the new keys
-bash    scripts/audit-localization.sh   # list whatever is still untranslated
-
-xcodebuild -project Compositor.xcodeproj -scheme Compositor \
-           -destination 'platform=macOS' test
-```
-
-`rerere` is enabled: conflict resolutions you have already worked out are recorded and
-replayed automatically when upstream makes a similar change. The `upstream` remote is
-configured **fetch-only** (its push URL is `DISABLED://`), so pushing upstream by mistake
-is structurally impossible — only `origin` accepts pushes.
-
-## 发布
-
-### GitHub Actions（日常用的就是这条）
-
-推送到 `main` 就会自动构建，**不用手动操作**。
-
-**每个版本各占一个 Release**，附件也带版本号，互不干扰：
-
-| 去处 | 内容 | 行为 |
-|---|---|---|
-| Release `v<版本>` | `Compositor-<版本>.dmg` | 版本号变了 → 新建 Release；没变 → 只替换这一个附件 |
-| Actions artifact | 同一份 DMG | 90 天，每次推送各存一份 |
-
-于是「下载最新版」永远是：去 [Releases](https://github.com/vvlang/Compositor-zh/releases)
-看最上面那个 Release，页面干净——每个版本一行，不用在一堆 DMG 里挑。
-
-早先的做法是让 `latest` 持有附件，`--clobber` 只覆盖同名文件，附件名里却带着版本号，
-所以每升一次版本就留下一个旧的（1.4.8 / 1.4.10 / 1.5.1 同时挂着），读者根本不知道该下哪个。
-现在按版本分开，这个问题就不存在了。
-
-想知道手上的 DMG 到底是哪次构建的，看该 Release 说明里的「构建自提交」和 SHA-256。
-main 上连续推送时，前一次构建会被取消（`cancel-in-progress`），只保留最后一次。
-
-需要固定某次构建时打 tag：
-
-```bash
-git tag v1.5.1-build2 && git push origin v1.5.1-build2
-```
-
-这会发出一个按 tag 命名的 Release，与按版本号发布的那份并存。
-
-CI 里还有一步 `Verify › localization`，跑 `scripts/audit-localization.sh`。
-本地化的问题不会让编译变红（漏翻的键只是静默显示英文），所以单独一个 job 守着它。
-本地想先自查一遍：
-
-```bash
-bash scripts/audit-localization.sh
-```
-
-### 本机构建
-
-```bash
-bash scripts/package-adhoc-dmg.sh   # → dist/Compositor-<version>.dmg
-```
-
-注意用 `bash` 调用而不是 `./scripts/package-adhoc-dmg.sh`——
-放在云同步目录里时，可执行位会被同步客户端清掉。
-
-### 带公证的正式发布（上游做法）
-
-`scripts/release.sh` 会构建 Release 版本，使用 Developer ID 签名，经 `notarytool` 公证并装订，最后打包为 `dist/Compositor-<version>.dmg`。
-
-它需要以下依赖（均保存在仓库之外）：
-
-- 登录钥匙串中的 **Developer ID Application** 证书
-- 通过 `xcrun notarytool store-credentials "compositor-notary" …` 保存的公证凭据
-- [`create-dmg`](https://github.com/create-dmg/create-dmg)（`brew install create-dmg`）
 
 ## 许可证
 
