@@ -12,13 +12,22 @@ Adobe Photoshop 价格太贵，而 GIMP 这类工具的界面又不够熟悉，�
 
 ### 下载
 
-前往 [robbietilton.com/compositor](https://robbietilton.com/compositor) 获取 Compositor，或直接从 [GitHub Releases](https://github.com/robbietilton/Compositor/releases/latest) 下载最新版本。
+**本仓库的汉化版**：从 [GitHub Releases](https://github.com/vvlang/Compositor-zh/releases) 下载
+最新版本——每次合并上游后自动构建，文件名形如 `Compositor-<版本>.dmg`。
+
+> 构建用 ad-hoc 签名、未经公证，首次打开需要手动放行一次，见下方
+> [「本仓库构建的 DMG：如何绕过 Gatekeeper」](#本仓库构建的-dmg如何绕过-gatekeeper)。
+
+**上游英文版**（功能跟进最快）：[robbietilton.com/compositor](https://robbietilton.com/compositor)
+或 [上游 Releases](https://github.com/robbietilton/Compositor/releases/latest)。
 
 ### Homebrew
 
 ```sh
 brew install --cask robbietilton-compositor
 ```
+
+该 cask 装的是**上游英文版**，没有汉化。
 
 ### 本仓库构建的 DMG：如何绕过 Gatekeeper
 
@@ -142,7 +151,7 @@ bash scripts/package-adhoc-dmg.sh
 
 ## Simplified Chinese Localization
 
-> 🌐 [简体中文](README.md#简体中文本地化--simplified-chinese-localization) ｜ English (current file)
+> 🌐 [简体中文](README.md#translations) ｜ English (current file)
 
 This repository is a Simplified Chinese localization of upstream
 [robbietilton/Compositor](https://github.com/robbietilton/Compositor). It layers a complete

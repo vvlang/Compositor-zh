@@ -1,5 +1,7 @@
 # Compositor
 
+> 🌐 **English** (current file) ｜ 简体中文：[README.zh-CN.md](README.zh-CN.md)
+
 Adobe Photoshop costs too much and tools like GIMP don’t feel familiar enough for me to stay in flow. That’s why I built Compositor.
 
 The goal was to create a full-featured image editor that is completely free and open source. I used to use Photoshop for compositing and post-processing, so Compositor is built around that workflow - with the tools needed to create a pixel-perfect final image.
@@ -9,13 +11,20 @@ Because it’s open source, you can download the Xcode project and add, remove, 
 ## Installation
 
 ### Download
-Get Compositor from [robbietilton.com/compositor](https://robbietilton.com/compositor), or download the latest release directly from [GitHub Releases](https://github.com/robbietilton/Compositor/releases/latest).
+**Upstream (English)**: get Compositor from [robbietilton.com/compositor](https://robbietilton.com/compositor),
+or download the latest release from [upstream Releases](https://github.com/robbietilton/Compositor/releases/latest).
+
+**This fork (简体中文)**: [GitHub Releases](https://github.com/vvlang/Compositor-zh/releases) —
+built automatically after each upstream merge, as `Compositor-<version>.dmg`. Built ad-hoc and
+not notarized, so the first launch needs one manual allow (see the Chinese README).
 
 ### Homebrew
 
 ```sh
 brew install --cask robbietilton-compositor
 ```
+
+That cask installs the **upstream English build**, not the Chinese one.
 
 ## Features
 
@@ -88,7 +97,15 @@ brew install --cask robbietilton-compositor
 
 ## Translations
 
-Compositor is English only for now, and translation pull requests aren't being accepted. It's maintained by one person, every new string would need translating from then on, and translations in languages I don't read can't be reviewed. I'll revisit this once the app settles; until then, please don't open localization PRs.
+> 🌐 **简体中文**：[README.zh-CN.md](README.zh-CN.md) ｜ English (current file)
+
+This fork ships a Simplified Chinese interface on top of upstream's English releases.
+See [Simplified Chinese Localization](README.zh-CN.md#simplified-chinese-localization)
+for how it's built, what to watch when merging upstream, and why English strings are kept
+where they're compared or persisted.
+
+Upstream itself is English only and isn't accepting localization pull requests — that's
+the upstream author's call, and this fork doesn't change it.
 
 ## Building
 
