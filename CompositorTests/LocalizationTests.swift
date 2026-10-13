@@ -86,6 +86,8 @@ struct LocalizationTests {
     /// 译文与原文相同是合理的：它们是尺寸/单位模板或算法名，不是文案。
     private let verbatimKeys: Set<String> = [
         "%@", "%@ × %@ px", "%@ × %@ px · sRGB", "%@%%", "%@°  %@",
+        // CMYK 后接配置文件名：色彩模式记号在前、配置文件名在后，中文里顺序不变。
+        "CMYK – %@",
     ]
 
     private func zhHansTable() -> [String: String] {

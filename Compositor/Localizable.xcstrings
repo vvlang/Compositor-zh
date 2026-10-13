@@ -1057,6 +1057,39 @@
         }
       }
     },
+    "CMYK": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CMYK"
+          }
+        }
+      }
+    },
+    "CMYK writes a printer's inks through the profile in View › CMYK › Profile": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CMYK 通过「显示 › CMYK › 配置文件」中的配置文件写入印刷油墨"
+          }
+        }
+      }
+    },
+    "CMYK – %@": {
+      "extractionState": "extracted",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CMYK – %@"
+          }
+        }
+      }
+    },
     "Camera Raw Filter": {
       "extractionState": "manual",
       "localizations": {
@@ -1438,6 +1471,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "点击对象以选取其轮廓 · Tab 切换到魔棒 · Shift 组合 · Option 减去 · 在内部拖动可移动 · ⌘-拖动移动像素 · Delete 清除 · ⌘D 取消选择"
+          }
+        }
+      }
+    },
+    "Click and drag two points on canvas": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在画布上点击并拖出两个点"
           }
         }
       }
@@ -3862,6 +3906,17 @@
         }
       }
     },
+    "From": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "起点"
+          }
+        }
+      }
+    },
     "Fuzziness": {
       "extractionState": "manual",
       "localizations": {
@@ -3891,6 +3946,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "灰度系数"
+          }
+        }
+      }
+    },
+    "Gamut Warning": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "色域警告"
           }
         }
       }
@@ -5512,6 +5578,17 @@
         }
       }
     },
+    "Linear blurs along the line; Radial keeps the start sharp and blurs outwards": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "线性沿直线模糊；径向保持起点锐利、向外模糊"
+          }
+        }
+      }
+    },
     "Linear histogram with automatic vertical scaling. Tall spikes may extend beyond the graph; all tones from 0 to 255 remain included.": {
       "extractionState": "manual",
       "localizations": {
@@ -5596,6 +5673,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "液化推移像素 · 模糊柔化画面 · 涂抹沿方向拖动颜色"
+          }
+        }
+      }
+    },
+    "Load Profile…": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "载入配置文件…"
           }
         }
       }
@@ -6634,6 +6722,17 @@
         }
       }
     },
+    "No profile": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无配置文件"
+          }
+        }
+      }
+    },
     "No tool selected · Press a tool's key to pick one · Space to pan": {
       "extractionState": "manual",
       "localizations": {
@@ -7140,13 +7239,13 @@
         }
       }
     },
-    "Other formats: PDF%@": {
+    "Other formats: TIFF and PDF%@": {
       "extractionState": "extracted",
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "其他格式：PDF%@"
+            "value": "其他格式：TIFF 和 PDF%@"
           }
         }
       }
@@ -7624,6 +7723,17 @@
         }
       }
     },
+    "Profile": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "配置文件"
+          }
+        }
+      }
+    },
     "Project tabs": {
       "extractionState": "manual",
       "localizations": {
@@ -7642,6 +7752,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "投影"
+          }
+        }
+      }
+    },
+    "Proof Colors": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打样颜色"
           }
         }
       }
@@ -9571,6 +9692,17 @@
         }
       }
     },
+    "Swap From and To: blur the start and sharpen toward the end": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "交换起点与终点：把起点模糊、让末端变清晰"
+          }
+        }
+      }
+    },
     "Swap colors": {
       "extractionState": "manual",
       "localizations": {
@@ -9725,6 +9857,28 @@
         }
       }
     },
+    "The blur where the line ends, and past it": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "直线终点及其之后的模糊"
+          }
+        }
+      }
+    },
+    "The blur where the line starts": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "直线起点处的模糊"
+          }
+        }
+      }
+    },
     "The brush trails the pointer on a string this long, so a shaky hand still draws a smooth line": {
       "extractionState": "manual",
       "localizations": {
@@ -9831,6 +9985,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "色调"
+          }
+        }
+      }
+    },
+    "To": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "终点"
           }
         }
       }
@@ -10304,6 +10469,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "每边 1–%@ 像素，最多 %@ 百万像素，分辨率 1–9,600 像素/英寸。"
+          }
+        }
+      }
+    },
+    "Use a CMYK ICC profile, such as the one your printer gave you": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用 CMYK ICC 配置文件，例如打印机附赠的那份"
           }
         }
       }

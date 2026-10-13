@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 /// File › Export As…: the flattened canvas as a PNG, a JPEG or a one-page PDF, at its own size or scaled, previewed
 /// as it will be written. A light take on Photoshop's Export As: one image, the settings that matter, and its size.
@@ -43,6 +44,8 @@ struct ExportAsSheet: View {
         var width: Int
         var height: Int
         var sixteenBit: Bool
+        /// In this CMYK profile's inks, for print (JPEG, TIFF and PDF); nil for RGB.
+        var cmyk: CMYKProfile?
     }
     struct Encoded {
         let settings: Settings
@@ -50,8 +53,15 @@ struct ExportAsSheet: View {
         let preview: CGImage
     }
     private var settings: Settings {
-        Settings(format: format, options: options, width: width, height: height, sixteenBit: sixteenBit && format == .png && deepRaster != nil)
+        Settings(format: format, options: options, width: width, height: height, sixteenBit: sixteenBit && format == .png && deepRaster != nil,
+                 cmyk: cmyk && takesCMYK ? profile : nil)
     }
+    /// The formats that can be written in a printer's inks.
+    private var takesCMYK: Bool { format == .jpeg || format == .tiff || format == .pdf }
+    /// CMYK for print: off each time, as most exports are for screens.
+    @State private var cmyk = false
+    /// The CMYK profile, as View › CMYK › Profile sets it.
+    private var profile: CMYKProfile? { session.proofProfile ?? CMYK.chosen }
     /// A PNG at 16 bits a channel: off by default, it's about twice the size.
     @State private var sixteenBit = false
     @State private var result: Encoded?
@@ -134,14 +144,28 @@ struct ExportAsSheet: View {
                             .help("Keep the 16-bit layers' full precision, in a file about twice the size")
                     }
                 }
+                if takesCMYK {
+                    GridRow {
+                        Text("Color")
+                        HStack(spacing: 10) {
+                            colorMenu
+                            // CMYK goes through View › CMYK › Profile's profile, named under the settings; a printer's own
+                            // can be loaded here too.
+                            if cmyk {
+                                Button("Load Profile…") { loadProfile() }
+                                    .help("Use a CMYK ICC profile, such as the one your printer gave you")
+                            }
+                        }
+                    }
+                }
                 if format == .pdf {
                     GridRow {
                         Text("Page")
                         Text(pageSize).foregroundStyle(.secondary)
                     }
                 }
-                // JPEG has no transparency, and a PDF's page shows through it, so both fill it with a color.
-                if format == .jpeg || format == .pdf {
+                // JPEG and ink have no transparency, and a PDF's page shows through it, so they fill it with a color.
+                if format == .jpeg || format == .pdf || (format == .tiff && cmyk) {
                     GridRow {
                         Text("Background")
                         DialogColorSwatch(title: "Export Background", color: matte, session: session)
@@ -150,11 +174,17 @@ struct ExportAsSheet: View {
                 }
             }
             HStack(spacing: 12) {
-                // 有说明文字时才走 L10n；单独一个 sRGB 时保持字面量——色彩空间名
-                // 各语言写法一致，进目录只会在运行时悄悄回落。上游新增了 EXR 一支。
+                // 四支里有三支带说明文字（CMYK 那支还带插值），单独一个 sRGB
+                // 保持字面量：色彩空间名各语言写法一致，进目录查不到时反而会
+                // 静默回落成英文，看着"正常"实则没译。
                 if format == .exr {
                     L10n.text("Brighter than white kept · Transparency kept").foregroundStyle(.secondary)
-                } else if format == .png {
+                } else if takesCMYK && cmyk {
+                    // 插值里再套一层 ?? 和引号，提取器只能截到一半；先把值取出来，
+                    // 键里就只剩一处 \(…)，抽取器认得。
+                    let name = profile?.name ?? L10n.string("No profile")
+                    L10n.text("CMYK – \(name)").foregroundStyle(.secondary)
+                } else if format == .png || format == .tiff {
                     L10n.text("Transparency kept · sRGB").foregroundStyle(.secondary)
                 } else {
                     Text(verbatim: "sRGB").foregroundStyle(.secondary)
@@ -194,16 +224,20 @@ struct ExportAsSheet: View {
                 let data: Data, preview: CGImage
                 switch requested.format {
                 case .jpeg:
-                    let encoded = try await ImageExporter.shared.jpeg(sized, options: requested.options)
+                    let encoded = try await ImageExporter.shared.jpeg(sized, options: requested.options, cmyk: requested.cmyk)
                     (data, preview) = (encoded.data, encoded.preview)
+                case .tiff:
+                    let matte = CGColor(srgbRed: requested.options.red, green: requested.options.green, blue: requested.options.blue, alpha: 1)
+                    (data, preview) = try await ImageExporter.shared.tiffData(sized, cmyk: requested.cmyk, matte: matte)
                 case .png: (data, preview) = (try await ImageExporter.shared.pngData(sized), sized.image)
                 // Shown as everything is, brighter than white as white.
                 case .exr: (data, preview) = (try await ImageExporter.shared.exrData(sized), try DeepLayer.dithered(sized.image))
                 case .pdf:
                     let background = CGColor(srgbRed: requested.options.red, green: requested.options.green,
                                              blue: requested.options.blue, alpha: 1)
-                    (data, preview) = (try await ImageExporter.shared.pdfData(sized, background: background),
-                                       try await ImageExporter.shared.flattened(sized, over: background))
+                    (data, preview) = (try await ImageExporter.shared.pdfData(sized, background: background, cmyk: requested.cmyk),
+                                       try requested.cmyk.map { try CMYK.convert(sized.image, to: $0, over: background) }
+                                           ?? ImageExporter.shared.flattened(sized, over: background))
                 }
                 try Task.checkCancellation()
                 result = Encoded(settings: requested, data: data, preview: preview)
@@ -216,7 +250,27 @@ struct ExportAsSheet: View {
         }
     }
 
-    /// PDF, and EXR with an HDR layer: a menu beside PNG and JPEG, blue with the chosen one's name while it's chosen,
+    /// RGB or CMYK: one small menu, as few need CMYK. The profile CMYK goes through is View › CMYK › Profile's, named in
+    /// the line under the settings.
+    private var colorMenu: some View {
+        Menu(cmyk ? "CMYK" : "RGB") {
+            Toggle("RGB", isOn: Binding(get: { !cmyk }, set: { if $0 { cmyk = false } }))
+            Toggle("CMYK", isOn: Binding(get: { cmyk }, set: { if $0 { cmyk = true } }))
+        }
+        .menuStyle(.button).buttonStyle(.bordered).fixedSize()
+        .help("CMYK writes a printer's inks through the profile in View › CMYK › Profile")
+    }
+
+    private func loadProfile() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [UTType(filenameExtension: "icc") ?? .data, UTType(filenameExtension: "icm") ?? .data]
+        panel.message = "Choose a CMYK ICC profile, such as the one your printer gave you"
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        do { session.proofProfile = try CMYK.load(url) }
+        catch { self.error = error.localizedDescription }
+    }
+
+    /// TIFF, PDF, and EXR with an HDR layer: a menu beside PNG and JPEG, blue with the chosen one's name while it's chosen,
     /// as the selected segment beside it would be.
     @ViewBuilder private var moreFormats: some View {
         let others = formats.filter { $0 != .png && $0 != .jpeg }
@@ -228,7 +282,7 @@ struct ExportAsSheet: View {
             .pickerStyle(.inline).labelsHidden()
         }
         .menuStyle(.button).fixedSize()
-        .help("Other formats: PDF\(others.contains(.exr) ? ", and EXR to keep light brighter than white" : "")")
+        .help("Other formats: TIFF and PDF\(others.contains(.exr) ? ", and EXR to keep light brighter than white" : "")")
         if chosen { menu.buttonStyle(.borderedProminent) } else { menu.buttonStyle(.bordered) }
     }
 

@@ -36,7 +36,10 @@ JUNK_KEYS = {"", "#", "%"}
 VERBATIM_OK = {
     "%@", "%@%%", "%@ × %@ px", "%@ × %@ px · sRGB", "%@°  %@",
     "100%", "px", "pixels", "pixels/inch",
-    "RGB", "HSL", "ASCII",
+    "RGB", "HSL", "ASCII", "CMYK",
+    # 色彩模式名 + 配置文件的固定前缀。CMYK 和后接的配置文件名在中文里
+    # 顺序不变（CMYK – 某配置文件），所以整句保持原样。
+    "CMYK – %@",
     "Bayer 2 × 2", "Bayer 4 × 4", "Bayer 8 × 8", "Floyd–Steinberg",
     "Atkinson (Classic Mac)", "Scanlines (CRT)", "Halftone Dots", "Halftone Lines",
     "Halftone Diamonds", "Mac Patterns",
