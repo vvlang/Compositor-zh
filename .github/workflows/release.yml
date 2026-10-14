@@ -67,7 +67,10 @@ jobs:
           settings=$(xcodebuild -project Compositor.xcodeproj -scheme Compositor \
             -configuration Release -showBuildSettings 2>/dev/null)
           version=$(printf '%s\n' "$settings" | awk -F' = ' '/ MARKETING_VERSION = /{print $2; exit}')
+          build=$(printf '%s\n' "$settings" | awk -F' = ' '/ CURRENT_PROJECT_VERSION = /{print $2; exit}')
           echo "version=$version" >> "$GITHUB_OUTPUT"
+          # appcast.xml 里的 sparkle:version 用的是 CFBundleVersion，不是 MARKETING_VERSION。
+          echo "build=$build" >> "$GITHUB_OUTPUT"
           # 打 tag 时沿用触发它的 tag；其余情况按 MARKETING_VERSION 发布，
           # 于是「同一个版本号」永远是同一个 Release，附件用 --clobber 覆盖。
           if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
@@ -149,6 +152,34 @@ jobs:
           path: dist/Compositor-${{ steps.version.outputs.version }}.dmg
           retention-days: 90
           if-no-files-found: error
+
+      # 签名并发布 Sparkle 更新源。走这一步才有自动更新：SUFeedURL 指向本仓库的
+      # appcast.xml，Sparkle 用 SUPublicEDKey 里的公钥验签，私钥只存在于
+      # GitHub Secret 里（经标准输入送给 sign_update，不落盘）。
+      #
+      # 钥匙串在 runner 上不存在——每次都是干净环境——所以必须显式喂私钥。
+      # 没有这个 Secret 就跳过：DMG 照发，但没有 appcast.xml，不会提示更新。
+      - name: Sign and publish the update feed
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+        run: |
+          if [[ -z "$SPARKLE_PRIVATE_KEY" ]]; then
+            echo "::notice title=未配置自动更新::没有 SPARKLE_PRIVATE_KEY，跳过签名。"
+            exit 0
+          fi
+          # sign_update 由 Sparkle 这个 SPM 依赖带下来。构建那步用的 DerivedData
+          # 路径是固定的（scripts/package-adhoc-dmg.sh 里 WORK 写死），runner 上
+          # 也是同一个路径，所以直接找就行——不依赖本机缓存。
+          export SIGN_UPDATE=$(find "$HOME/Library/Caches/CompositorAdhoc/DerivedData" \
+            -name sign_update -type f -perm +111 2>/dev/null | head -1)
+          [[ -x "$SIGN_UPDATE" ]] || { echo "::error::找不到 sign_update。"; exit 1; }
+          echo "sign_update: $SIGN_UPDATE"
+
+          bash scripts/publish-sparkle.sh \
+            "${{ steps.version.outputs.tag }}" \
+            "${{ steps.version.outputs.version }}" \
+            "${{ steps.version.outputs.build }}"
 
       - name: Summary
         if: always()

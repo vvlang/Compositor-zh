@@ -49,9 +49,21 @@ minimum=$(printf '%s\n' "$settings" | awk -F' = ' '/ LSMinimumSystemVersion = /{
 build="${3:-$(printf '%s\n' "$settings" | awk -F' = ' '/ CURRENT_PROJECT_VERSION = /{print $2; exit}')}"
 
 echo "==> Signing $DMG (build $build)"
-signature=$("$SIGN_UPDATE" --ed-signature "$DMG" --account "$SPARKLE_PRIVATE_KEY" \
-  | awk '/sparkle:edSignature/{print $2}')
-[[ -n "$signature" ]] || { echo "✗ 签名失败。"; exit 1; }
+# Sparkle 2.6+ 废弃了 -s <key>：从钥匙串读，或 --ed-key-file - 从标准输入读。
+# CI 的 runner 每次都是干净环境、没有钥匙串，所以走标准输入——私钥由
+# GitHub Secret 以管道送进来，不落盘。
+#
+# sign_update 输出是一整行：sparkle:edSignature="…" length="…"。用 awk 取 $2 会
+# 抓到后面的 length（实测只有 17 个字符的垃圾），所以按属性名精确提取。
+signature=$(printf '%s' "$SPARKLE_PRIVATE_KEY" \
+  | "$SIGN_UPDATE" --ed-key-file - "$DMG" \
+  | sed -n 's/.*sparkle:edSignature="\([^"]*\)".*/\1/p')
+# EdDSA 签名固定 88 字符（64 字节的 base64）。短于此说明提取失败或私钥不对——
+# 与其把坏签名写进 appcast 让 Sparkle 静默拒绝更新，不如当场停下。
+[[ ${#signature} -eq 88 ]] || {
+  echo "✗ 签名提取失败（得到 ${#signature} 字符，应为 88）。检查 SPARKLE_PRIVATE_KEY。"
+  exit 1
+}
 echo "    $signature"
 
 echo "==> Publishing Release $TAG"
