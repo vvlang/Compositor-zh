@@ -81,6 +81,8 @@ DANGLING = re.compile(r"%a(?!rg)")
 KEEP_AS_IS = {
     "px", "°", "×", "·", "%", "× ", "dpi", "DPI",
     "RGB", "HSL", "HSV", "CMYK", "ASCII", "JPEG", "PNG", "PDF", "TIFF", "HEIC", "PSD", "PSB", "SVG",
+    # Adobe 的产品名，中文界面里也这么叫；末尾的省略号要留着。
+    "Camera Raw…",
     "Esc", "Tab", "Return", "Space", "Enter", "Delete", "Backspace", "Shift", "Control", "Option", "Command",
     "B", "E", "M", "L", "F", "R", "G", "X", "Y", "V", "S", "H", "P", "Z", "Q", "W", "T", "I", "O", "U", "A", "D", "C", "N",
 }

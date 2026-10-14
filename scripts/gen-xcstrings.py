@@ -37,6 +37,8 @@ VERBATIM_OK = {
     "%@", "%@%%", "%@ × %@ px", "%@ × %@ px · sRGB", "%@°  %@",
     "100%", "px", "pixels", "pixels/inch",
     "RGB", "HSL", "ASCII", "CMYK",
+    # Camera Raw 是 Adobe 的产品名，中文界面里也这么叫；省略号要留着。
+    "Camera Raw…",
     # 色彩模式名 + 配置文件的固定前缀。CMYK 和后接的配置文件名在中文里
     # 顺序不变（CMYK – 某配置文件），所以整句保持原样。
     "CMYK – %@",

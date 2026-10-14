@@ -1101,6 +1101,17 @@
         }
       }
     },
+    "Camera Raw…": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Camera Raw…"
+          }
+        }
+      }
+    },
     "Cancel": {
       "extractionState": "manual",
       "localizations": {
@@ -1453,13 +1464,13 @@
         }
       }
     },
-    "Click a shortcut, then press its new key combination. Changes apply when you save.": {
+    "Click a shortcut, then press its new key combination, or ⊗ to remove it. Changes apply when you save.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "点击某个快捷键，然后按下新的组合键。保存后生效。"
+            "value": "点击某个快捷键，再按下新的组合键，或按 ⊗ 移除。保存后生效。"
           }
         }
       }
@@ -4907,6 +4918,17 @@
         }
       }
     },
+    "Import, then open the Camera Raw Filter": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "导入后打开 Camera Raw 滤镜"
+          }
+        }
+      }
+    },
     "Importing images…": {
       "extractionState": "manual",
       "localizations": {
@@ -6755,6 +6777,17 @@
         }
       }
     },
+    "None": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未设置"
+          }
+        }
+      }
+    },
     "Normal": {
       "extractionState": "manual",
       "localizations": {
@@ -8207,6 +8240,17 @@
         }
       }
     },
+    "Remove this shortcut": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除此快捷键"
+          }
+        }
+      }
+    },
     "Removes the lens's distortion and vignetting": {
       "extractionState": "manual",
       "localizations": {
@@ -8302,6 +8346,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "重置"
+          }
+        }
+      }
+    },
+    "Reset %@": {
+      "extractionState": "extracted",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重置 %@"
+          }
+        }
+      }
+    },
+    "Reset %@ to its defaults": {
+      "extractionState": "extracted",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将 %@ 重置为默认值"
           }
         }
       }
