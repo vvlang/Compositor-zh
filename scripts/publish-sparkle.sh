@@ -45,7 +45,8 @@ fi
 }
 
 settings=$(xcodebuild -project "$APP.xcodeproj" -scheme "$APP" -configuration Release -showBuildSettings 2>/dev/null)
-minimum=$(printf '%s\n' "$settings" | awk -F' = ' '/ LSMinimumSystemVersion = /{gsub(/"/,"",$2); print $2; exit}')
+minimum=$(printf '%s\n' "$settings" | awk -F' = ' '/ MACOSX_DEPLOYMENT_TARGET = /{gsub(/"/,"",$2); print $2; exit}')
+[[ -n "$minimum" ]] || { echo "✗ 取不到 MACOSX_DEPLOYMENT_TARGET，appcast 的 minimumSystemVersion 会是空的。"; exit 1; }
 build="${3:-$(printf '%s\n' "$settings" | awk -F' = ' '/ CURRENT_PROJECT_VERSION = /{print $2; exit}')}"
 
 echo "==> Signing $DMG (build $build)"
