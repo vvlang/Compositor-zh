@@ -1,8 +1,8 @@
-# Compositor project format, versions 1–13
+# Compositor project format, versions 1–14
 
 > 🌐 **English**：[docs/project-format.zh-CN.md](docs/project-format.zh-CN.md) ｜ 简体中文（当前文件）
 
-The manifest identifies `com.compositor.project`, version `12` for new saves (versions `1`–`11` remain readable), and the sRGB working space. It stores document UUID, pixel dimensions, active layer UUID, and layers in bottom-to-top order. Each layer stores its UUID, name, visibility, transform (origin, size, clockwise rotation, flips, sampling), and optional image filename. Blank layers have no image asset.
+The manifest identifies `com.compositor.project`, version `14` for new saves (versions `1`–`13` remain readable), and the sRGB working space. It stores document UUID, pixel dimensions, active layer UUID, and layers in bottom-to-top order. Each layer stores its UUID, name, visibility, transform (origin, size, clockwise rotation, flips, sampling), and optional image filename. Blank layers have no image asset.
 
 清单里写入 bundle identifier `com.compositor.project`，新存为版本 `11`（版本 `1`–`10` 仍可读），工作色域为 sRGB。它保存文档 UUID、像素尺寸、当前图层 UUID，以及按从底到顶顺序排列的图层。每个图层保存自己的 UUID、名字、可见性、变换（原点、尺寸、顺时针旋转、翻转、采样方式）以及可选的图片文件名。空白图层没有图片资源。
 
@@ -54,3 +54,5 @@ An optional `effects` record contains independent `stroke`, `shadow`, `colorOver
 Version 12 lets a layer's image file be a 16-bit PNG: a 16-bit layer, which keeps its pixels at 16 bits a channel (sRGB, premultiplied alpha as in every PNG layer) and is shown and edited through a copy rounded to 8 bits with a fine noise, made again on load rather than stored. Masks stay 8-bit. Nothing in the manifest changes: the PNG's own bit depth says which kind of layer it is. Files declaring versions 1–11 cannot contain 16-bit images, and older app builds reject v12.
 
 Version 13 lets a layer's image file be OpenEXR, named `<layer UUID>.exr`: an HDR layer, whose pixels hold light brighter than white as half floats in extended sRGB (white is 1). It is shown, and for now edited, through a copy clipped to white and rounded to 8 bits with a fine noise, made again on load. An EXR whose values all stay within white loads as a 16-bit layer. Masks stay 8-bit PNG. Files declaring versions 1–12 cannot contain EXR images, and older app builds reject v13.
+
+Version 14 adds optional `smoothing` to a layer’s `shape` style. True draws rectangle corners with Figma-style 60% smoothing (the iOS squircle match); false or missing keeps circular corners. Radius stays in document pixels, and smoothing reduces when the corners have insufficient room. Drawing previews and scaled redraws use the same geometry. Files declaring versions 1–13 cannot enable smoothing, and older app builds reject v14.

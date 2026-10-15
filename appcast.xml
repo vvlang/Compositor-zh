@@ -7,7 +7,7 @@
       <pubDate>Wed, 14 Oct 2026 02:51:52 +0000</pubDate>
       <sparkle:version>49</sparkle:version>
       <sparkle:shortVersionString>1.5.2</sparkle:shortVersionString>
-      <sparkle:minimumSystemVersion></sparkle:minimumSystemVersion>
+      <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
       <link>https://github.com/vvlang/Compositor-zh/releases/tag/v1.5.2</link>
       <enclosure url="https://github.com/vvlang/Compositor-zh/releases/download/v1.5.2/Compositor-1.5.2.dmg" sparkle:edSignature="Jx+Qdfgosi4nSJaQcaCBlK6dxtaDIWxS8zkg6Wh6gZNE422lshGg4PZEUOFbXTucyIgbKSANqVNer1ZUl4ksAA==" length="10452485" type="application/octet-stream"/>
     </item>

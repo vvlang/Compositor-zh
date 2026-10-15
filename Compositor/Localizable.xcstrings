@@ -3609,17 +3609,6 @@
         }
       }
     },
-    "Fill": {
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "填充"
-          }
-        }
-      }
-    },
     "Fill Text": {
       "extractionState": "manual",
       "localizations": {
@@ -3627,6 +3616,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "填充文字"
+          }
+        }
+      }
+    },
+    "Fill color": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "填充"
           }
         }
       }
@@ -9358,6 +9358,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "平滑"
+          }
+        }
+      }
+    },
+    "Smooth Corners": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "平滑圆角"
           }
         }
       }
