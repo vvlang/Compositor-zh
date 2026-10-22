@@ -13,6 +13,7 @@ nonisolated enum FilterKind: String, CaseIterable, Sendable {
     case bloomGlow = "Bloom / Glow"
     case dither = "Dither"
     case scanlines = "Scanlines"
+    case rgbSplit = "RGB Split"
     case tonalContrast = "Tonal Contrast"
     case lensCorrection = "Lens Correction"
     case cameraRaw = "Camera Raw Filter"
@@ -29,7 +30,9 @@ nonisolated enum FilterKind: String, CaseIterable, Sendable {
     var repeatsAsLastFilter: Bool { self != .contentAwareFill && !isImageAdjustment }
     /// Filters made wholly in Core Image, which works at 16 bits as readily as at 8: a 16-bit layer runs them once, on its
     /// 16-bit pixels, rather than three times through `DeepLayer.run`.
-    var runsAtSixteenBits: Bool { self == .gaussianBlur || self == .motionBlur || self == .progressiveBlur || self == .bloomGlow }
+    var runsAtSixteenBits: Bool {
+        self == .gaussianBlur || self == .motionBlur || self == .progressiveBlur || self == .bloomGlow
+    }
     /// Filters whose output channels each depend on all three input channels (Camera Raw's color, and the ones that work
     /// from brightness), which a 16-bit layer runs the slower, channel-by-channel way (`DeepLayer.run`).
     var mixesChannels: Bool { self == .cameraRaw || self == .tonalContrast || self == .scanlines }
@@ -104,6 +107,18 @@ nonisolated struct FilterSettings: Equatable, Sendable {
     var tonalShadows: Double = 40
     var tonalMidtones: Double = 60
     var tonalHighlights: Double = 30
+    /// RGB Split: how far the spectrum spreads (red one way, blue the other, green staying), and how far it smears into
+    /// streaks, in layer pixels; for Radial, at `rgbSplitReach` from the center, less nearer it and more beyond.
+    var rgbSplitDistance: Double = 10
+    var rgbSplitBlur: Double = 0
+    /// Linear's direction, in degrees counterclockwise from horizontal.
+    var rgbSplitAngle: Double = 0
+    /// Radial: outwards from `rgbSplitCenter` (document coordinates, set by clicking the canvas) instead of along the
+    /// angle. Reach is how far from the center the full distance applies, in document pixels: half the layer's
+    /// visible diagonal when the filter opens.
+    var rgbSplitRadial = false
+    var rgbSplitCenter: CGPoint?
+    var rgbSplitReach: Double = 1000
     /// Lens Correction's Remove Distortion, −100–100: positive straightens barrel distortion
     /// (lines bowing outward), negative straightens pincushion (lines bowing inward).
     var distortion: Double = 0
@@ -149,6 +164,10 @@ nonisolated struct FilterSettings: Equatable, Sendable {
         result.tonalMidtones = clamp(tonalMidtones, -100...100, 60)
         result.tonalHighlights = clamp(tonalHighlights, -100...100, 30)
         result.distortion = clamp(distortion, -100...100, 0)
+        result.rgbSplitDistance = clamp(rgbSplitDistance, 0...200, 10)
+        result.rgbSplitBlur = clamp(rgbSplitBlur, 0...400, 0)
+        result.rgbSplitAngle = clamp(rgbSplitAngle, -180...180, 0)
+        result.rgbSplitReach = clamp(rgbSplitReach, 1...100_000, 1000)
         result.refineEdges = clamp(refineEdges, 0...40, 12)
         result.matteContrast = clamp(matteContrast, 0...100, 25)
         result.shiftEdge = clamp(shiftEdge, -10...10, 0)
@@ -254,6 +273,35 @@ nonisolated enum PixelFilter {
         return image.clampedToExtent().cropped(to: region)
     }
 
+    /// RGB Split: the layer dispersed on the GPU (see `MetalDispersion`), in the job's pixels.
+    static func rgbSplit(_ job: FilterJob, settings: FilterSettings) throws -> CGImage {
+        let width = job.image.width, height = job.image.height
+        let context = try BrushRaster.context(width: width, height: height, mask: false)
+        BrushRaster.draw(job.image, in: CGRect(x: 0, y: 0, width: width, height: height), mask: false, context: context)
+        let distance = settings.rgbSplitDistance * job.scale, blur = settings.rgbSplitBlur * job.scale
+        guard distance > 0 || blur > 0 else { return job.image }
+        guard let gpu = MetalDispersion.shared else { throw ExportError.render }
+        // The center and reach, from the document into this image's pixels (rows top-down).
+        let toPixels = job.mapping.inverted()
+        let center = settings.rgbSplitCenter?.applying(toPixels) ?? CGPoint(x: Double(width) / 2, y: Double(height) / 2)
+        let reach = settings.rgbSplitReach * hypot(toPixels.a, toPixels.b)
+        let angle = settings.rgbSplitAngle * .pi / 180
+        let sides = job.canvasSides
+        // Enough samples that neighbors sit a pixel or two apart, within what the GPU does at once.
+        let spread = settings.rgbSplitRadial ? distance * 2 : distance, smear = settings.rgbSplitRadial ? blur * 2 : blur
+        try gpu.run(context, MetalDispersion.Parameters(
+            center: SIMD2(Float(center.x), Float(center.y)),
+            // Rows run top-down here, so up on screen is a smaller row.
+            direction: SIMD2(Float(cos(angle)), Float(-sin(angle))),
+            distance: Float(distance), blur: Float(blur), reach: Float(reach), radial: settings.rgbSplitRadial ? 1 : 0,
+            sides: (sides.contains(.left) ? 1 : 0) | (sides.contains(.right) ? 2 : 0) | (sides.contains(.top) ? 4 : 0)
+                | (sides.contains(.bottom) ? 8 : 0),
+            spectral: distance > 0 ? UInt32(min(32, max(3, Int(spread)))) : 1,
+            smear: blur > 0 ? UInt32(min(24, max(2, Int(smear / 2)))) : 1))
+        guard let image = context.makeImage() else { throw ExportError.render }
+        return image
+    }
+
     static func run(_ job: FilterJob) throws -> CGImage {
         let settings = job.settings.normalized
         let width = job.image.width, height = job.image.height
@@ -294,6 +342,7 @@ nonisolated enum PixelFilter {
             image = try render(blurred.cropped(to: extent), job: job)
         case .progressiveBlur:
             image = try render(progressivelyBlurred(edges, job: job, settings: settings, extent: extent).cropped(to: extent), job: job)
+        case .rgbSplit: image = try rgbSplit(job, settings: settings)
         case .motionBlur:
             // Core Image's y axis points up, so its counterclockwise angle matches Photoshop's.
             let streaked = extending(edges, past: job.canvasSides, of: extent).applyingFilter("CIMotionBlur", parameters: [
@@ -566,6 +615,8 @@ final class FilterEdit {
         switch kind {
         case .gaussianBlur: return settings.preserveTransparency ? 0 : CGFloat(settings.radius * 3 + 2)
         case .motionBlur: return CGFloat(settings.distance / 2 + 2)
+        // Radial reaches farther than its distance past `rgbSplitReach` from the center.
+        case .rgbSplit: return CGFloat((settings.rgbSplitDistance + settings.rgbSplitBlur) * (settings.rgbSplitRadial ? 2 : 1) + 2)
         case .progressiveBlur: return CGFloat(max(settings.progressiveFrom, settings.progressiveTo) * 3 + 2)
         case .bloomGlow: return CGFloat(settings.bloomRadius * 3 + 2)
         default: return 0
@@ -700,6 +751,8 @@ extension EditorSession {
         }
         commitTransform(); cancelCrop(); cancelLasso()
         guard var layer = activeLayer, let document else { return }
+        pauseGIFForEditing(for: layer.id)
+        layer = pixelEditingLayer(for: layer)
         do {
             // An empty layer has no pixels until something is put on it; Vignette starts it with clear ones.
             let startedEmpty = layer.asset == nil
@@ -717,6 +770,14 @@ extension EditorSession {
                 let area = shown.isNull || shown.isEmpty ? CGRect(origin: .zero, size: document.size) : shown
                 settings.progressiveStart = CGPoint(x: area.midX, y: area.minY + area.height * 0.35)
                 settings.progressiveEnd = CGPoint(x: area.midX, y: area.maxY)
+            }
+            // RGB Split's center starts in the middle of the layer's visible part, reaching to its corners.
+            if kind == .rgbSplit, !repeating {
+                let shown = CGRect(origin: layer.transform.origin, size: layer.transform.size)
+                    .intersection(CGRect(origin: .zero, size: document.size))
+                let area = shown.isNull || shown.isEmpty ? CGRect(origin: .zero, size: document.size) : shown
+                settings.rgbSplitCenter = CGPoint(x: area.midX, y: area.midY)
+                settings.rgbSplitReach = max(1, hypot(area.width, area.height) / 2)
             }
             // Gradient Map starts from the foreground and background colors, as in Photoshop.
             if kind == .gradientMap {
@@ -756,6 +817,14 @@ extension EditorSession {
         await commitFilter()
         // Nothing to apply (a zero amount), or it couldn't be: don't leave it open with no panel to close it.
         if filterEdit === edit { cancelFilter() }
+    }
+
+    /// RGB Split's Radial center, clicked or dragged on the canvas (document coordinates).
+    func moveRGBSplitCenter(to point: CGPoint) {
+        guard let edit = filterEdit, edit.kind == .rgbSplit, edit.settings.rgbSplitRadial, !edit.committing else { return }
+        var settings = edit.settings
+        settings.rgbSplitCenter = point
+        updateFilter(settings, preview: edit.preview)
     }
 
     /// Progressive Blur's line, dragged on the canvas: either end moved (document coordinates).
@@ -974,11 +1043,11 @@ extension EditorSession {
             let asset = made.asset
             guard let index = document?.layers.firstIndex(where: { $0.id == edit.layerID }),
                   let current = document?.layers[index],
-                  current.asset?.image === edit.original.image || (edit.startedEmpty && current.asset == nil),
-                  current.transform == edit.transform else { return }
+                  displayedAsset(for: current)?.image === edit.original.image || (edit.startedEmpty && current.asset == nil),
+                  pixelEditTransformMatches(current, transform: edit.transform) else { return }
             // A grown layer's mask (covering the old grid) is carried onto the new one, its edge tone past the old edge.
             var mask = current.mask
-            if let grown, let owned = current.mask, owned.placement == nil,
+            if current.gifAnimation == nil, let grown, let owned = current.mask, owned.placement == nil,
                owned.asset.image.width > 1 || owned.asset.image.height > 1 {
                 var enabled = owned
                 enabled.isEnabled = true
@@ -986,11 +1055,12 @@ extension EditorSession {
                                                       width: asset.image.width, height: asset.image.height) else { throw ExportError.render }
                 mask = owned.replacing(try LayerMask.asset(from: carried))
             }
+            // 上游把逐字段构造换成了 layerByEditingPixels helper——新加的字段
+            // （GIF 图层之类）都在那里面，逐字段构造会漏掉。这个 helper 必须保留。
+            let edited = try layerByEditingPixels(current, asset: asset, transform: made.transform ?? current.transform, mask: mask)
+            // 撤销步骤名只在显示时查目录，存盘的仍是英文。
             beginEdit(String.LocalizationValue(edit.kind.rawValue))
-            document?.layers[index] = ImageLayer(id: current.id, asset: asset, name: current.name, isVisible: current.isVisible,
-                transform: made.transform ?? current.transform, parentID: current.parentID, isGroup: false,
-                opacity: current.opacity, blendMode: current.blendMode, mask: mask, maskSourceID: current.maskSourceID,
-                effects: current.effects)
+            document?.layers[index] = edited
             endEdit()
         } catch { brushError = error.localizedDescription }
     }
@@ -1021,8 +1091,8 @@ extension EditorSession {
                 return mask
             }.value
             guard let index = document?.layers.firstIndex(where: { $0.id == edit.layerID }),
-                  let layer = document?.layers[index], layer.asset?.image === edit.original.image,
-                  layer.transform == edit.transform else { return }
+                  let layer = document?.layers[index], displayedAsset(for: layer)?.image === edit.original.image,
+                  pixelEditTransformMatches(layer, transform: edit.transform) else { return }
             let asset = try LayerMask.asset(from: made)
             beginEdit(String.LocalizationValue(edit.kind.rawValue))
             document?.layers[index].mask = layer.mask.map { $0.replacing(asset) } ?? LayerMask(asset: asset)

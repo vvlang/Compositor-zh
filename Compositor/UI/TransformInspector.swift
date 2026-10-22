@@ -102,9 +102,12 @@ struct TransformInspector: View {
     }
 }
 
-private struct TransformValueField: View {
+struct TransformValueField: View {
+    /// 标题走目录。
     let label: String.LocalizationValue
-    /// UI 测试用的辅助功能标识符，与可翻译的标题分开。
+    /// UI 测试用的辅助功能标识符，与可翻译的标题分开。上游是从标题派生的
+    /// （"transform\(label)"），那在英文标题下才稳定——标题一汉化，
+    /// 标识符就变成中文，UI 测试找不到控件。
     let id: String
     var suffix: String? = nil
     let value: CGFloat

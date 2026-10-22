@@ -12,7 +12,7 @@ struct CompositorApp: App {
     /// 拆出来是为了让每一句都能单独进目录 —— 中文语序和英文不同，合成一句就没法重排了。
     private var deleteLayerTitle: String {
         if let effect = session.selectedEffect { return L10n.string("Delete \(effect.kind.localizedName)") }
-        if session.isMaskSelected, session.activeLayer?.mask != nil { return L10n.string("Delete Layer Mask") }
+        if session.isMaskSelected, session.activeLayer.flatMap({ session.selectedMask(for: $0) }) != nil { return L10n.string("Delete Layer Mask") }
         return session.selectedLayerIDs.count > 1 ? L10n.string("Delete Layers") : L10n.string("Delete Layer")
     }
     var body: some Scene {
@@ -36,13 +36,13 @@ struct CompositorApp: App {
                     // is unavailable while an import or modal edit is active.
                     if session.textDraft != nil || session.levels != nil || session.isProjectBusy || session.showsNewDocument || session.showsImporter || session.renamingLayerID != nil || session.transformEdit?.persistent == true {
                         Button("Undo") {
-                            if NSApp.keyWindow?.firstResponder is NSTextView {
+                            if NSApp.isEditingText {
                                 NSApp.sendAction(NSSelectorFromString("undo:"), to: nil, from: nil)
                             }
                         }
                             .configuredKeyboardShortcut("z")
                         Button("Redo") {
-                            if NSApp.keyWindow?.firstResponder is NSTextView {
+                            if NSApp.isEditingText {
                                 NSApp.sendAction(NSSelectorFromString("redo:"), to: nil, from: nil)
                             }
                         }
@@ -50,8 +50,10 @@ struct CompositorApp: App {
                     } else {
                         // 三元表达式在 Swift 里只能是 String，拿不到 LocalizedStringKey，
                         // 所以这里用 label 闭包显式取词。
+                        // A Save or Open panel's name field undoes its own typing (see `isEditingText`).
                         Button {
-                            session.undo()
+                            if NSApp.keyWindow is NSSavePanel { NSApp.sendAction(NSSelectorFromString("undo:"), to: nil, from: nil) }
+                            else { session.undo() }
                         } label: {
                             Text(verbatim: session.history.canUndo
                                  ? L10n.string("Undo \(session.history.undoName)")
@@ -59,7 +61,8 @@ struct CompositorApp: App {
                         }
                             .configuredKeyboardShortcut("z").disabled(!session.canUndo)
                         Button {
-                            session.redo()
+                            if NSApp.keyWindow is NSSavePanel { NSApp.sendAction(NSSelectorFromString("redo:"), to: nil, from: nil) }
+                            else { session.redo() }
                         } label: {
                             Text(verbatim: session.history.canRedo
                                  ? L10n.string("Redo \(session.history.redoName)")
@@ -91,7 +94,7 @@ struct CompositorApp: App {
                             .disabled(RecentProjects.shared.urls.isEmpty)
                     }
                         .disabled(!applicationDelegate.projects.canStart)
-                    Button("Import Images…") { session.showsImporter = true }
+                    Button("Import…") { session.showsImporter = true }
                         .disabled(session.levels != nil || session.showsBusy || session.isImporting || session.showsNewDocument)
                 }
                 CommandGroup(replacing: .saveItem) {
@@ -108,7 +111,7 @@ struct CompositorApp: App {
                     Button("Export PNG…") { Task { await applicationDelegate.projects.exportPNG() } }
                         .configuredKeyboardShortcut("e", modifiers: [.command, .shift])
                         .disabled(session.document == nil || !applicationDelegate.projects.canStart)
-                    // PNG, JPEG or PDF, sized and previewed; ⌥⇧⌘W, as Photoshop's Export As.
+                    // Still images or GIF timelines, sized and previewed; ⌥⇧⌘W, as Photoshop's Export As.
                     Button("Export As…") { Task { await applicationDelegate.projects.exportAs() } }
                         .configuredKeyboardShortcut("w", modifiers: [.command, .option, .shift])
                         .disabled(session.document == nil || !applicationDelegate.projects.canStart)
@@ -240,13 +243,13 @@ struct CompositorApp: App {
                     // (the pasteboard, the copied pixels, the busy flag) isn't observed, so a disabled state could
                     // go stale — the first Paste after a Copy used to beep until something else refreshed the menu.
                     Button("Cut") {
-                        if NSApp.keyWindow?.firstResponder is NSTextView { NSApp.sendAction(#selector(NSText.cut(_:)), to: nil, from: nil) }
+                        if NSApp.isEditingText { NSApp.sendAction(#selector(NSText.cut(_:)), to: nil, from: nil) }
                         else if session.selection != nil, session.canCopyPixels { Task { await session.cutSelection() } }
                         else { NSSound.beep() }
                     }
                         .configuredKeyboardShortcut("x")
                     Button("Copy") {
-                        if NSApp.keyWindow?.firstResponder is NSTextView { NSApp.sendAction(#selector(NSText.copy(_:)), to: nil, from: nil) }
+                        if NSApp.isEditingText { NSApp.sendAction(#selector(NSText.copy(_:)), to: nil, from: nil) }
                         else if session.canCopyPixels || session.canCopyLayer { session.copySelection() }
                         else { NSSound.beep() }
                     }
@@ -257,7 +260,7 @@ struct CompositorApp: App {
                         // On the New canvas screen an image on the clipboard makes the canvas, even with a size field
                         // being typed in; a size copied as text still goes into the field.
                         if session.canPasteImageAsNewCanvas { Task { await session.pasteImageAsNewCanvas() } }
-                        else if NSApp.keyWindow?.firstResponder is NSTextView { NSApp.sendAction(#selector(NSText.paste(_:)), to: nil, from: nil) }
+                        else if NSApp.isEditingText { NSApp.sendAction(#selector(NSText.paste(_:)), to: nil, from: nil) }
                         else if applicationDelegate.workspace.pasteCopiedLayer() { }
                         else if session.canPaste { session.paste() }
                         else { NSSound.beep() }
@@ -269,13 +272,13 @@ struct CompositorApp: App {
                     Button("Keyboard Shortcuts…") { ShortcutSettings.shared.show() }
                     // Photoshop's fill shortcuts; in a text field they keep their text meaning.
                     Button("Fill with Foreground Color") {
-                        if NSApp.keyWindow?.firstResponder is NSTextView {
+                        if NSApp.isEditingText {
                             NSApp.sendAction(#selector(NSResponder.deleteWordBackward(_:)), to: nil, from: nil)
                         } else { Task { await session.fillSelection(with: .foreground) } }
                     }
                         .configuredKeyboardShortcut(.delete, modifiers: .option).disabled(!session.canEditPixels)
                     Button("Fill with Background Color") {
-                        if NSApp.keyWindow?.firstResponder is NSTextView {
+                        if NSApp.isEditingText {
                             NSApp.sendAction(#selector(NSResponder.deleteToBeginningOfLine(_:)), to: nil, from: nil)
                         } else { Task { await session.fillSelection(with: .background) } }
                     }
@@ -315,7 +318,7 @@ struct CompositorApp: App {
                     Button("Mask's Black Areas") {
                         if let id = session.activeLayerID { session.loadMaskSelection(layerID: id) }
                     }
-                        .disabled(session.activeLayer?.mask == nil || !session.canEditSelection)
+                        .disabled(session.activeLayer.flatMap { session.selectedMask(for: $0) } == nil || !session.canEditSelection)
                     Divider()
                     Button("Expand…") { session.promptSelectionAmount(.expand) }
                         .disabled(!session.canModifySelection)
@@ -375,9 +378,16 @@ struct CompositorApp: App {
                 }
                 CommandMenu("Layer") {
                     Menu("New Adjustment Layer") {
-                        ForEach(AdjustmentKind.allCases, id: \.self) { kind in
+                        // The Image menu's adjustments, then the Filter menu's filters.
+                        ForEach(AdjustmentKind.imageAdjustments, id: \.self) { kind in
                             Button { session.addAdjustment(kind) } label: {
                                 Text(verbatim: kind.localizedName + (kind.isEditable ? L10n.string("…") : ""))
+                            }
+                        }
+                        Divider()
+                        ForEach(AdjustmentKind.filters, id: \.self) { kind in
+                            Button { session.addAdjustment(kind) } label: {
+                                Text(verbatim: kind.localizedName + "…")
                             }
                         }
                     }.disabled(!session.canEditLayers || session.document == nil)
@@ -449,4 +459,11 @@ struct CompositorApp: App {
         do { session.proofProfile = try CMYK.load(url) }
         catch { session.importError = error.localizedDescription }
     }
+}
+
+extension NSApplication {
+    /// Whether the keyboard is in a text field, so Cut, Copy, Paste, Undo and the fill shortcuts act on its text rather
+    /// than the canvas. A Save or Open panel counts: the sandbox runs it in another process, so its file name field
+    /// isn't a text view of ours, and copying or pasting a name there reached the canvas instead.
+    var isEditingText: Bool { keyWindow?.firstResponder is NSTextView || keyWindow is NSSavePanel }
 }

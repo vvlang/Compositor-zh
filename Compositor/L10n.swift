@@ -219,3 +219,18 @@ extension HueSampleMode {
         }
     }
 }
+
+// 线型和线帽的 rawValue 写进工程清单（lineStyle / lineCap），是身份值，永远保持英文。
+// 显示时另取译文。
+extension ShapeLineStyle {
+    var localizedName: String { L10n.name(rawValue) }
+}
+
+extension ShapeLineCap {
+    var localizedName: String { L10n.name(rawValue) }
+}
+
+// 通道名同样可能进 PNG 元数据，rawValue 保持英文；显示时另取译文。
+extension ChannelPack.Channel {
+    var localizedName: String { L10n.name(rawValue) }
+}

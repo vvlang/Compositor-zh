@@ -7,23 +7,33 @@ final class ProjectTab: Identifiable {
     let id = UUID()
     let session: EditorSession
     let controller: ProjectController
-    /// 只在没有工程文件时才用作显示回退，从不落盘，所以可以本地化。
-    /// 已保存的工程用的是文件名，标题跟着用户走，不该翻译。
-    let defaultName: String.LocalizationValue
-    /// `defaultName` 的英文原文。`LocalizationValue` 取不出自己的键，而新标签去重
-    /// 必须按英文比——中文系统上 `title` 是「未命名」，用它比会让编号一直从 2 重新开始。
-    let defaultKey: String
+    /// Shown until the project is saved: Untitled, the opened file's name, or a Photoshop artboard's.
+    ///
+    /// 英文原文。新标签去重按它比——用显示值比的话，中文系统上编号会一直从 2 重新开始。
+    var defaultName: String
+    /// `defaultName` 的英文原文，去重比较用它。
+    var defaultKey: String { defaultName }
+    /// 「未命名」这类固定占位的显示值（查目录得到）。用户数据的名字没有这一项：
+    /// artboard 名和已打开文件的文件名原样显示——PSD 里真有个画板叫 "Untitled"，
+    /// 它该显示自己的名字，不是「未命名」。
+    var localizedDefaultName: String?
     var title: String {
-        session.projectURL?.deletingPathExtension().lastPathComponent ?? String(localized: defaultName)
+        session.projectURL?.deletingPathExtension().lastPathComponent ?? localizedDefaultName ?? defaultName
     }
-    init(name: String.LocalizationValue, key: String? = nil) {
-        defaultName = name
-        defaultKey = key ?? String(localized: name)
+    /// 固定占位名。`name` 必须用**插值**构造（"Untitled \(String(n))"），目录里的
+    /// 键才是模板 "Untitled %@"；拼好的字符串（"Untitled 2"）查表会拿它当键，
+    /// 找不到就退回英文。
+    init(name: String.LocalizationValue, key: String) {
+        defaultName = key
+        localizedDefaultName = String(localized: name)
         session = EditorSession()
         controller = ProjectController(session: session)
     }
-    /// 从文件名来的名字是用户的数据，原样保留。
-    convenience init(name: String) { self.init(name: String.LocalizationValue(name), key: name) }
+    /// 用户数据的名字：artboard 名、已打开文件的文件名。原样保留，不查目录。
+    convenience init(userDataName: String) {
+        self.init(name: String.LocalizationValue(userDataName), key: userDataName)
+        localizedDefaultName = nil
+    }
 }
 
 @MainActor @Observable
@@ -39,7 +49,8 @@ final class ProjectWorkspace {
             && s.gradientEdit == nil && s.pixelMove == nil && s.colorPicker == nil
     }
     init() {
-        let first = ProjectTab(name: "Untitled")
+        let first = ProjectTab(name: "Untitled", key: "Untitled")
+        defer { attach(first) }
         first.session.skipsInitialClipboardCanvasSize = true
         tabs = [first]; selectedID = first.id
         first.controller.workspace = self
@@ -49,14 +60,17 @@ final class ProjectWorkspace {
     ///
     /// 去重按 `defaultName` 的英文键比，不按 `title`：title 是查过目录的显示值，
     /// 中文系统上是「未命名」，用它比较会让编号永远从 2 重新开始。
-    private var freeUntitledName: String {
-        String(localized: String.LocalizationValue(freeUntitledKey))
-    }
-    /// 与 `freeUntitledName` 同一套规则，但保留英文原文，供去重比较。
-    private var freeUntitledKey: String {
+    /// 新标签的名字：「未命名」，或最低可用的「Untitled N」。
+    ///
+    /// 显示值用**插值**构造：目录里的键是模板 "Untitled %@"，而拼好的字符串
+    ///（"Untitled 2"）查表时会拿它当键，找不到就退回英文。英文键另外给出，
+    /// 供去重比较。
+    private var freeUntitledName: (value: String.LocalizationValue, key: String) {
         let taken = Set(tabs.map(\.defaultKey))
-        guard taken.contains("Untitled") else { return "Untitled" }
-        return (2...).lazy.map { "Untitled \($0)" }.first { !taken.contains($0) }!
+        guard taken.contains("Untitled") else { return (String.LocalizationValue("Untitled"), "Untitled") }
+        return (2...).lazy.map { n -> (String.LocalizationValue, String) in
+            (String.LocalizationValue("Untitled \(String(n))"), "Untitled \(n)")
+        }.first { !taken.contains($0.1) }!
     }
     /// Whether a tab can close: not the only one while it's empty, the blank start it would only be replaced with.
     func canClose(_ tab: ProjectTab) -> Bool {
@@ -65,12 +79,34 @@ final class ProjectWorkspace {
     @discardableResult
     func addTab(reuseEmpty: Bool = true) -> ProjectTab {
         if reuseEmpty, tabs.count == 1, current.session.document == nil { return current }
-        // freeUntitledName 返回的是查过目录的显示值；英文键另存一份，供去重比较。
-        let tab = ProjectTab(name: String.LocalizationValue(freeUntitledName), key: freeUntitledKey)
+        let name = freeUntitledName
+        let tab = ProjectTab(name: name.value, key: name.key)
         tab.controller.workspace = self; tab.controller.window = window
+        attach(tab)
         tabs.append(tab); selectedID = tab.id
         return tab
     }
+    /// Gives `tab` the way to open a Photoshop file's artboards, each as a document in a tab of its own: the first in
+    /// `tab` while it's still empty, the rest in new tabs named for them.
+    private func attach(_ tab: ProjectTab) {
+        tab.session.opensArtboard = { [weak self, weak tab] document, name in
+            guard let self, let tab else { return }
+            let target: ProjectTab
+            if tab.session.document == nil, tabs.contains(where: { $0 === tab }) {
+                target = tab
+                target.defaultName = name
+                target.localizedDefaultName = nil
+            } else {
+                target = ProjectTab(userDataName: name)
+                target.controller.workspace = self; target.controller.window = window
+                attach(target)
+                tabs.append(target)
+            }
+            selectedID = target.id
+            await target.session.importArtboard(document, named: name)
+        }
+    }
+
     /// Reorders a tab by dragging it in the strip. Chrome, not a document edit, so it never touches undo.
     /// `index` is where the tab should land in the final order, clamped to the array's bounds.
     func moveTab(_ id: UUID, to index: Int) {
@@ -116,7 +152,8 @@ final class ProjectWorkspace {
             selectedID = existing.id; return true
         }
         // Load into an unattached session, so a failed open never leaves a broken tab.
-        let tab = ProjectTab(name: url.deletingPathExtension().lastPathComponent)
+        let tab = ProjectTab(userDataName: url.deletingPathExtension().lastPathComponent)
+        attach(tab)
         tab.controller.window = window
         guard await tab.controller.open(url) else { return false }
         if tabs.count == 1, current.session.document == nil { tabs.removeAll() }
@@ -249,10 +286,19 @@ final class ProjectWorkspace {
         } else { target = addTab(reuseEmpty: false) }
         guard target.session.document == nil || target.session.canEditLayers else { return }
         let included = ids.reduce(into: Set(ids)) { $0.formUnion(sourceTab.session.descendantIDs(of: $1)) }
-        var copied = sourceDocument.layers.filter { included.contains($0.id) }
+        var copied = sourceDocument.layers.filter { included.contains($0.id) }.map { layer in
+            var copy = layer
+            copy.asset = snapshot.images[layer.id]
+            copy.gifAnimation = snapshot.animations[layer.id]
+            return copy
+        }
         let used = target.session.document?.layers.reduce(0) { $0 + ($1.asset.map { $0.image.width * $0.image.height } ?? 0) } ?? 0
         let added = copied.reduce(0) { $0 + ($1.asset.map { $0.image.width * $0.image.height } ?? 0) }
         guard used + added <= DocumentLimits.documentPixelBudget else { target.session.importError = "The copied layers exceed this project’s \(DocumentLimits.documentBudgetMegapixels)-megapixel limit."; return }
+        guard target.session.canRetainGIFSources(in: (target.session.document?.layers ?? []) + copied) else {
+            target.session.importError = "The copied GIFs exceed this project’s animation memory limit."
+            return
+        }
         isManaging = true
         sourceTab.session.isProjectBusy = true
         target.session.isProjectBusy = true
@@ -266,6 +312,14 @@ final class ProjectWorkspace {
                 if copied[i].adjustment != nil { copied[i].maskSourceID = nil; continue }
                 let layerID = copied[i].id
                 copied[i].asset = try await Task.detached(priority: .userInitiated) { try LiveMaskBaker.bake(snapshot, target: layerID) }.value
+                if copied[i].gifAnimation != nil {
+                    // An omitted live-mask source is baked into the displayed frame; keep that raster result
+                    // and its current mask, rather than replacing it with an unclipped frame during playback.
+                    if let record = snapshot.manifest.layers.first(where: { $0.id == layerID }) {
+                        copied[i].mask = snapshot.mask(for: record)
+                    }
+                    copied[i].gifAnimation = nil
+                }
                 copied[i].maskSourceID = nil
             }
             let mapping = Dictionary(uniqueKeysWithValues: copied.map { ($0.id, UUID()) })
@@ -293,7 +347,8 @@ final class ProjectWorkspace {
                 mask?.placement?.origin.x += center.x-anchor.x; mask?.placement?.origin.y += center.y-anchor.y
                 return ImageLayer(id: mapping[layer.id]!, asset: layer.asset, name: layer.name, isVisible: layer.isVisible,
                     transform: transform, parentID: layer.parentID.flatMap { mapping[$0] }, isGroup: layer.isGroup,
-                    opacity: layer.opacity, blendMode: layer.blendMode, mask: mask, maskSourceID: layer.maskSourceID.flatMap { mapping[$0] }, adjustment: layer.adjustment, shape: layer.shape, effects: layer.effects, text: layer.text)
+                    opacity: layer.opacity, blendMode: layer.blendMode, mask: mask, maskSourceID: layer.maskSourceID.flatMap { mapping[$0] }, adjustment: layer.adjustment, shape: layer.shape, effects: layer.effects, text: layer.text,
+                    gifAnimation: layer.gifAnimation)
             }
             target.session.isProjectBusy = false
             target.session.beginEdit("Copy Layers from Project")

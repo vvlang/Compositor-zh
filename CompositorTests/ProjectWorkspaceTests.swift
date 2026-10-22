@@ -81,9 +81,11 @@ import Testing
         first.session.createDocument(width: 10, height: 10)
         #expect(workspace.canClose(first))
         let second = workspace.addTab(), third = workspace.addTab()
-        #expect(second.title == L10n.string("Untitled 2") && third.title == L10n.string("Untitled 3"))
+        // 带编号的名字在目录里是模板键 "Untitled %@"，不是字面量 "Untitled 2"——
+        // 用运行时字符串当键查不到模板，会退回英文。插值转成 String，键才是 "%@"。
+        #expect(second.title == L10n.string("Untitled \(String(2))") && third.title == L10n.string("Untitled \(String(3))"))
         workspace.removeTab(second.id)
-        #expect(workspace.addTab().title == L10n.string("Untitled 2"), "the lowest free number")
+        #expect(workspace.addTab().title == L10n.string("Untitled \(String(2))"), "the lowest free number")
         for tab in workspace.tabs { workspace.removeTab(tab.id) }
         #expect(workspace.tabs.count == 1 && workspace.current.title == L10n.string("Untitled"), "the last tab closed leaves Untitled")
     }
