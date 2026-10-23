@@ -70,7 +70,7 @@ Example.comp/
 违反以下任何一条规则，Compositor 都会**静默拒绝整个文件**：画布保持原样不做任何变化。如果更新没有发生，请先检查这些规则。
 
 - **图像文件以图层 ID 命名**。一个 ID 为 `"6F1D…"` 的图层必须使用 `"imageFile": "6F1D….png"`，对应蒙版则使用 `"maskFile": "6F1D….mask.png"`，ID 必须与 manifest 中一致（大写）。每个 ID 在工程内必须唯一。
-- **图像为 8 位 PNG**，存放在 `images/` 目录。图层图像为 RGBA；蒙版为 8 位灰度图（白色显示图层，黑色隐藏）。
+- **图像为 8 位 PNG**，存放在 `images/` 目录。图层图像为 RGBA；蒙版为 8 位灰度图（白色显示图层，黑色隐藏）。其它格式一律先转成 PNG：JPEG、WebP、PSD 会被转换，PDF 则按页渲染（应用用 300 DPI），每页一个图层，第一页在最上面，最后一页排在 `layers` 数组末尾。
 - **混合模式的拼写必须精确**：Normal、Darken、Multiply、Color Burn、Linear Burn、Lighten、Screen、Color Dodge、Linear Dodge (Add)、Overlay、Soft Light、Hard Light、Vivid Light、Linear Light、Pin Light、Hard Mix、Difference、Exclusion、Subtract、Divide、Hue、Saturation、Color、Luminosity。
 - **manifest 中列出的每个图层都必须有对应的图像文件**，且 manifest 必须是合法的 JSON。
 
@@ -134,7 +134,7 @@ Compositor 保存的工程还会包含一个 `QuickLook` 文件夹（`Preview.jp
 ```
 
 - `ranges` 与 `channels` 按 RGB、红、绿、蓝顺序排列。曲线点的 x 从 0 到 255，且 x 必须递增。
-- `kind` 可以是以下之一：`Hue/Saturation`、`Levels`、`Curves`、`Exposure`、`Gradient Map`、`Grain`、`Invert`、`Black & White`、`Color Balance`、`Gaussian Blur`、`Motion Blur`、`Add Noise`。
+- `kind` 可以是以下之一：`Hue/Saturation`、`Levels`、`Curves`、`Exposure`、`Gradient Map`、`Grain`、`Invert`、`Black & White`、`Color Balance`、`Gaussian Blur`、`Motion Blur`、`Add Noise`；从清单 `version` 16 起还有 `Progressive Blur`、`Bloom / Glow` 和 `RGB Split`，它们的设置放在 `filterLayerSettings` 对象里（字段和取值范围见 [project-format.md](project-format.md)，版本 16）。
 - 对于 Hue/Saturation，请在 `adjustment` 上设置 `hue`、`saturation` 和 `lightness`。Color Balance 使用一个 `colorBalanceSettings` 对象（包含 `shadowCyanRed`、`shadowMagentaGreen`、`shadowYellowBlue`，以及 `mid` 和 `highlight` 的相同字段，每个取值范围 −100 到 100，外加 `preserveLuminosity`）。
 - 对于其他类型，获取精确形状最简单的方法是：在 Compositor 中添加一个、保存工程，然后从该工程的 manifest 中复制相应字段。
 
