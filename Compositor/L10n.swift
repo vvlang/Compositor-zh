@@ -38,6 +38,16 @@ extension FilterKind {
     var localizedName: String { L10n.name(rawValue) }
 }
 
+// 镜头特效的两个枚举的 rawValue 会写进工程的 filterLayerSettings，是存档值，
+// 永远保持英文；显示时另取译文。
+extension LensEffect {
+    var localizedName: String { L10n.name(rawValue) }
+}
+
+extension BokehShape {
+    var localizedName: String { L10n.name(rawValue) }
+}
+
 extension BackgroundQuality {
     var localizedName: String { L10n.name(rawValue) }
 }

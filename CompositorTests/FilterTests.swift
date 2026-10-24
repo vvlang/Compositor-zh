@@ -249,7 +249,11 @@ struct FilterTests {
         let upright = try split { $0.rgbSplitDistance = 8; $0.rgbSplitAngle = 90 }
         #expect(total(upright, 0, 19...26, vertical: true) > total(upright, 2, 19...26, vertical: true) * 2, "red up on screen")
         let streaked = try split { $0.rgbSplitDistance = 4; $0.rgbSplitBlur = 16 }
-        #expect(total(streaked, 3, 44...48) > 0 && total(flat, 3, 44...48) == 0, "blur stretches it further")
+        // 上游 1.5.7 把涂抹改成向两侧摊开（不再只往一边拖），涂抹的总长度不变、方向对半分。
+        // 于是「模糊铺得更远」表现在两侧都铺出去，而不是只在一侧够到 44…48。
+        #expect(total(streaked, 3, 40...42) > 0 && total(flat, 3, 40...42) == 0, "blur stretches it further")
+        #expect(abs(total(streaked, 3, 15...30) - total(streaked, 3, 31...42)) < total(streaked, 3, 15...42) / 4,
+                "the smear no longer shifts one way")
         let radial = try split { $0.rgbSplitDistance = 8; $0.rgbSplitRadial = true; $0.rgbSplitCenter = CGPoint(x: 30.5, y: 30.5)
                                  $0.rgbSplitReach = 30 }
         #expect(radial(30, 30) == [255, 255, 255, 255], "the center stays sharp")

@@ -67,6 +67,17 @@
         }
       }
     },
+    "%@ ms": {
+      "extractionState": "extracted",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 毫秒"
+          }
+        }
+      }
+    },
     "%@ ms · %@ fps": {
       "extractionState": "extracted",
       "localizations": {
@@ -107,6 +118,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ 未压缩 RGBA 画布"
+          }
+        }
+      }
+    },
+    "%@ · Original": {
+      "extractionState": "extracted",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · 原图"
           }
         }
       }
@@ -525,6 +547,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "仅分析当前图层，或按显示效果分析所有可见图层"
+          }
+        }
+      }
+    },
+    "Anamorphic Flare": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "变形镜头耀光"
           }
         }
       }
@@ -969,6 +1002,17 @@
         }
       }
     },
+    "Bokeh": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "焦外光斑"
+          }
+        }
+      }
+    },
     "Boost": {
       "extractionState": "manual",
       "localizations": {
@@ -1042,6 +1086,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "保留超白高光 · 保留透明度"
+          }
+        }
+      }
+    },
+    "Brightness": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "亮度"
           }
         }
       }
@@ -1240,6 +1295,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "端点样式"
+          }
+        }
+      }
+    },
+    "Cat's Eye": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "猫眼"
           }
         }
       }
@@ -2124,6 +2190,17 @@
         }
       }
     },
+    "Copies": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "副本数"
+          }
+        }
+      }
+    },
     "Copy": {
       "extractionState": "manual",
       "localizations": {
@@ -2439,6 +2516,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "暗色调"
+          }
+        }
+      }
+    },
+    "Dashed": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "虚线"
           }
         }
       }
@@ -2938,6 +3026,17 @@
         }
       }
     },
+    "Dotted": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "点线"
+          }
+        }
+      }
+    },
     "Drag a color in the picture. Nearby color families move together.": {
       "extractionState": "manual",
       "localizations": {
@@ -3396,6 +3495,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "可编辑文字图层"
+          }
+        }
+      }
+    },
+    "Effect": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "效果"
           }
         }
       }
@@ -4555,6 +4665,17 @@
         }
       }
     },
+    "Hexagon": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "六边形"
+          }
+        }
+      }
+    },
     "Hide %@": {
       "extractionState": "extracted",
       "localizations": {
@@ -4742,6 +4863,28 @@
         }
       }
     },
+    "How bright a light has to be to flare": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "光线要多亮才会产生耀斑"
+          }
+        }
+      }
+    },
+    "How bright a light has to be to sparkle": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "光线要多亮才会闪出星芒"
+          }
+        }
+      }
+    },
     "How bright the lines are where the picture is black, so they show even over black": {
       "extractionState": "manual",
       "localizations": {
@@ -4753,6 +4896,17 @@
         }
       }
     },
+    "How brightly lights open into discs": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "光线化开成光斑时的明亮程度"
+          }
+        }
+      }
+    },
     "How far a color may be from the picked ones and still be selected": {
       "extractionState": "manual",
       "localizations": {
@@ -4760,6 +4914,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "颜色与取样色的接近程度，超过此值即不被选中"
+          }
+        }
+      }
+    },
+    "How far apart the copies are": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "各副本之间的距离"
           }
         }
       }
@@ -4830,6 +4995,28 @@
         }
       }
     },
+    "How far into the frame the copies show from that edge": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "副本从那条边向画面内延伸多远"
+          }
+        }
+      }
+    },
+    "How far out of focus: the size of each disc": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "失焦的程度：每个光斑的大小"
+          }
+        }
+      }
+    },
     "How far the blur softens, in pixels": {
       "extractionState": "manual",
       "localizations": {
@@ -4863,6 +5050,50 @@
         }
       }
     },
+    "How far the lens's coatings turn each streak blue along its length; none keeps the light's own color": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "镜头镀膜让每道光条沿长度变蓝的程度；为 0 时保持光线本来的颜色"
+          }
+        }
+      }
+    },
+    "How far the light spreads": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "光线扩散的范围"
+          }
+        }
+      }
+    },
+    "How far the spikes reach": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "光芒延伸的距离"
+          }
+        }
+      }
+    },
+    "How far the streaks reach across the picture": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "光条横扫画面的距离"
+          }
+        }
+      }
+    },
     "How long each frame shows": {
       "extractionState": "manual",
       "localizations": {
@@ -4870,6 +5101,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "每帧显示多久"
+          }
+        }
+      }
+    },
+    "How many spikes each light has, as the lens's aperture blades make them": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每束光芒有多少根芒刺，由镜头光圈的叶片决定"
+          }
+        }
+      }
+    },
+    "How many times the picture echoes, each fainter": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "画面重影的次数，每次都比上一次更淡"
+          }
+        }
+      }
+    },
+    "How much light scatters: a soft halo around bright areas, and gently lifted shadows": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "光线散射的程度：亮部周围泛起柔和光晕，暗部略微提亮"
           }
         }
       }
@@ -5013,6 +5277,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "色相改变颜色，饱和度改变其强度，明度改变其亮暗。"
+          }
+        }
+      }
+    },
+    "Hue/Saturation": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "色相/饱和度"
           }
         }
       }
@@ -5578,6 +5853,17 @@
         }
       }
     },
+    "Length": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "长度"
+          }
+        }
+      }
+    },
     "Lens Correction": {
       "extractionState": "manual",
       "localizations": {
@@ -5585,6 +5871,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "镜头校正"
+          }
+        }
+      }
+    },
+    "Lens Effects": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "镜头特效"
           }
         }
       }
@@ -5673,6 +5970,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "线条周围的光晕，类似 CRT 显示器的荧光"
+          }
+        }
+      }
+    },
+    "Light gathered at each disc's rim, as some lenses draw it": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "聚在每个光斑边缘的光，部分镜头会这样表现"
           }
         }
       }
@@ -5992,6 +6300,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "锁定原始纵横比"
+          }
+        }
+      }
+    },
+    "Long Dash": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "长虚线"
           }
         }
       }
@@ -6432,6 +6751,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "毫米"
+          }
+        }
+      }
+    },
+    "Mist": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "柔雾"
           }
         }
       }
@@ -7580,6 +7910,17 @@
         }
       }
     },
+    "Oval": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "椭圆"
+          }
+        }
+      }
+    },
     "Overlay": {
       "extractionState": "manual",
       "localizations": {
@@ -7888,6 +8229,17 @@
         }
       }
     },
+    "Points": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "芒数"
+          }
+        }
+      }
+    },
     "Polygonal": {
       "extractionState": "manual",
       "localizations": {
@@ -8108,6 +8460,17 @@
         }
       }
     },
+    "Prism": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "棱镜"
+          }
+        }
+      }
+    },
     "Process": {
       "extractionState": "manual",
       "localizations": {
@@ -8126,6 +8489,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "配置文件"
+          }
+        }
+      }
+    },
+    "Progressive Blur": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "渐进模糊"
           }
         }
       }
@@ -8284,6 +8658,17 @@
         }
       }
     },
+    "RGB Split": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "色散"
+          }
+        }
+      }
+    },
     "RGB changes brightness. Red, green, and blue also shift the color.": {
       "extractionState": "manual",
       "localizations": {
@@ -8346,6 +8731,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "比例"
+          }
+        }
+      }
+    },
+    "Reach": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "延伸范围"
           }
         }
       }
@@ -8845,6 +9241,17 @@
         }
       }
     },
+    "Ring": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "光环"
+          }
+        }
+      }
+    },
     "Rotate": {
       "extractionState": "manual",
       "localizations": {
@@ -8896,6 +9303,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "粗糙度"
+          }
+        }
+      }
+    },
+    "Round": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "圆形"
           }
         }
       }
@@ -9094,6 +9512,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "以中心为基准，同时缩放宽度和高度"
+          }
+        }
+      }
+    },
+    "Scanlines": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "扫描线"
           }
         }
       }
@@ -9912,6 +10341,17 @@
         }
       }
     },
+    "Solid": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "实线"
+          }
+        }
+      }
+    },
     "Solid, dashed or dotted; dashes grow with the line's width": {
       "extractionState": "manual",
       "localizations": {
@@ -10007,6 +10447,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "方块"
+          }
+        }
+      }
+    },
+    "Starburst": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "星芒"
           }
         }
       }
@@ -10370,6 +10821,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "纹理"
+          }
+        }
+      }
+    },
+    "The aperture's shape: round wide open, a hexagon of blades, an anamorphic oval, or a cat's eye toward the edges": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "光圈的形状：全开时是圆形，多边形叶片呈六边形，变形镜头呈椭圆，画面边缘处则是猫眼形"
           }
         }
       }
@@ -11272,6 +11734,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "填入 %@ 通道的内容：按灰度读取的图层或组，或纯黑、纯白"
+          }
+        }
+      }
+    },
+    "Which way it's pushed, toward the edge the prism sits at": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "推移的方向，指向棱镜所在的那条边"
           }
         }
       }

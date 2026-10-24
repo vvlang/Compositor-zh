@@ -182,6 +182,30 @@ python3 scripts/translate-missing.py        # 翻译缺失的（需要 MINIMAX_A
 - **顺序必须一致**（`String(format:)` 按位置取值，重排会静默装反）
 - 译文非空、不等于原文、无残缺的 `%arg`
 
+### 插值的类型决定键
+
+目录里的键就是**运行时真正查找的那个字符串**，所以插值的类型不能随便：
+
+| 插值 | 运行时键 | 目录里存的 |
+|---|---|---|
+| `\(String(x))` | `%@` | `%@` ✓ |
+| `\(Int(x))` | `%lld` | `%@` ✗ |
+
+`xcstringstool` 一律把插值提取成 `%arg`（脚本再换成 `%@`），但 `String(localized:)`
+和 SwiftUI 的 `LocalizedStringKey` 在运行时是**按插值的类型**拼键的：Int 插值得到
+`%lld`。目录里没有这个键，查表落空，界面静默显示英文——不报错、不崩溃，
+审计脚本也发现不了（它只查「键在不在、译了没译」）。
+
+所以**凡是插进键里的值，一律先包成 `String(...)`**：
+
+```swift
+L10n.string("\(String(Int(delay.rounded())))ms")     // 键 %@ms，目录里有
+L10n.string("\(Int(delay.rounded()))ms")             // 键 %lldms，永远查不到
+```
+
+上游的 SwiftUI 字面量（`Text("\(Int(x)) px")`）踩的是同一个坑：它们不是 `L10n`
+调用，目录里同样只有 `%@` 版本。要让它们翻译，得把插值也包成 `String(...)`。
+
 ### 「不需要翻译」的判据
 
 不能靠「长得像不像缩写」判断。`RGB` 该保持原样，但 `Navigator`、`Format`、
@@ -227,6 +251,15 @@ dc2ddca  catch the strings the first pass missed
 - **2026-10-13（修 1.5.1）**：上游新测试暴露两个真 bug——带编号的工程标签
   一直显示英文（目录里只有 `Untitled`，没有 `Untitled %@`）；拖拽区断言写死
   10pt，中文标签更宽，12 个 tab 把它挤到 6pt。
+- **2026-10-24（1.5.7）**：2 个冲突。代码只有 `GIFTimeline.swift` 一处——上游把
+  「Original」换成了真实帧延时；appcast 两边各自更新源，取我们的。
+  新的镜头特效带来 35 条新文案，顺带把上一轮漏登的 8 个枚举 rawValue 补上，
+  目录从 1060 条涨到 1103 条。期间发现「插值的类型决定键」那类静默失配
+  （Int 插值查 `%lld`，目录里只有 `%@`），本轮把 fork 自己那两处改掉了。
+  另外上游这轮把 RGB Split 的模糊改成向两侧摊开，却没改它的测试——那条断言写死了
+  单侧涂抹时的几何，照抄上游必然红。上游的 CI 恰好没跑到它（`verify.yml` 只在改了
+  Filters/FilterSheet 之类时才跑 filter 组，而 1.5.7 只动了 `MetalDispersion.swift`）；
+  我们这轮改了 FilterSheet，filter 组照跑，所以断言得自己改成新几何。
 
 ---
 
