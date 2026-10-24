@@ -65,6 +65,35 @@ gh release delete latest --repo vvlang/Compositor-zh --yes
 `localization` 必须用 macOS：目录靠 `xcstringstool` 提取，换 Linux 目录一致性
 那步会直接报错，形状检查还在，等于只验了一半。
 
+### 本机跑测试
+
+CI 用的是 Xcode 26.6 + macos-26。本机直连 `xcodebuild test` 会挂在两处，
+都不是代码问题：
+
+| 症状 | 原因 | 怎么办 |
+|---|---|---|
+| `No signing certificate "Mac Development" found` | 本机没有开发证书 | 加 `CODE_SIGN_IDENTITY=-` |
+| `Library not loaded: @rpath/Sparkle.framework`，`different Team IDs` | app 带了 hardened runtime，Sparkle 是另一份签名 | 加 `ENABLE_HARDENED_RUNTIME=NO`，构建后再 `codesign --force --deep --sign -` 一次（与 `package-adhoc-dmg.sh` 同一手） |
+
+照 CI 的样子跑：
+
+```sh
+xcodebuild build-for-testing -project Compositor.xcodeproj -scheme Compositor \
+  -destination 'platform=macOS,arch=arm64' -configuration Debug \
+  CODE_SIGN_IDENTITY=- ENABLE_HARDENED_RUNTIME=NO \
+  GCC_OPTIMIZATION_LEVEL=s SWIFT_OPTIMIZATION_LEVEL=-O
+codesign --force --deep --sign - <DerivedData>/Build/Products/Debug/Compositor.app
+bash scripts/ci-tests.sh <DerivedData>
+```
+
+**DerivedData 不要放在这个仓库里**：它在云同步目录里，同步客户端会破坏
+Sparkle.xcframework 里的符号链接，构建会报 `could not determine executable path`。
+用默认位置（`~/Library/Developer/Xcode/DerivedData`）就好。
+
+`ci-tests.sh` 一次开四个测试进程，四个都在 main actor 上跑，彼此抢 GPU。
+本机偶尔会出现 `The test runner hung before establishing connection`（宿主没起来，
+不是用例失败）或某条像素级断言偶发——**以 CI 为准**。
+
 ### 关于 Sparkle
 
 `Config/Info.plist` 的 `SUFeedURL` 指向**上游**，`scripts/publish.sh` 的 `REPO`
