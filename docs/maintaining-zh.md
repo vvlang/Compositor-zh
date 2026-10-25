@@ -299,6 +299,15 @@ dc2ddca  catch the strings the first pass missed
   写到版本 11（落后 6 个版本），这轮补齐到 18。
   Prism 改了行为：单双向可选、Offset 为 0 也生效、Blur 取代 Reach。带来 8 条新文案、
   5 条废弃文案（旧的 Reach 与两条 Threshold 说明）。
+  这轮还撞上**上游自己的红 CI**：`AdjustmentEditorTests.sharedEditorsKeepPixelsDynamicAndSupportCancel`
+  在 vignette / lensEffects / tonalContrast 三个用例上失败，上游在同一提交
+  （7b5ba97，run 40118025373）也是同样三个用例红。逐字段比对后确认**不是产品缺陷**：
+  面板里该有的值全都正确回填了（vignetteAmount 70、vignetteRoundness -40、
+  tonalAmount 80、tonalRadius 30、lens .bokeh + .hexagon），唯一差异是 `radius`
+  （5 对 10）——高斯模糊的半径，对这三种图层毫无意义。根因是断言的期望值只用
+  `filterLayer.applied(to: FilterSettings())` 算，漏了 `beginAdjustmentEditing` 里补上的
+  模糊/运动/噪点兜底值（`gaussianRadius` 的兜底是 10，而 `FilterSettings.radius` 的
+  默认值是 5）。按 1.5.7 的惯例改断言（照实现同样的构造方式），**不改上游实现**。
 
 ---
 

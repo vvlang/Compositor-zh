@@ -266,7 +266,23 @@ import Testing
         case .vignette, .lensEffects, .tonalContrast:
             // Their settings reopen in the filter's panel as they were saved.
             let reopened = try #require(session.filterEdit).settings
-            #expect(saved.filterLayer.applied(to: FilterSettings()).normalized == reopened.normalized)
+            // The panel is built the way beginAdjustmentEditing builds it: the layer's own
+            // settings first, then the blur, motion and noise values the layer falls back to.
+            // Compare against that same construction, or the fallbacks read as a difference.
+            var expected = saved.filterLayer.applied(to: FilterSettings())
+            expected.curves = saved.curves
+            expected.exposure = saved.exposure
+            expected.gradientMap = saved.gradientMap
+            expected.grain = saved.grain
+            expected.blackWhite = saved.blackWhite
+            expected.colorBalance = saved.colorBalance
+            expected.radius = saved.gaussianRadius
+            expected.angle = saved.resolvedMotionAngle
+            expected.distance = saved.resolvedMotionDistance
+            expected.amount = saved.resolvedNoiseAmount
+            expected.gaussian = saved.resolvedNoiseGaussian
+            expected.monochromatic = saved.resolvedNoiseMonochromatic
+            #expect(expected.normalized == reopened.normalized)
             session.updateFilter(FilterSettings(), preview: true)
             session.cancelFilter()
         case .hsv:
