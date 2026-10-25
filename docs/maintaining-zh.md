@@ -289,6 +289,16 @@ dc2ddca  catch the strings the first pass missed
   单侧涂抹时的几何，照抄上游必然红。上游的 CI 恰好没跑到它（`verify.yml` 只在改了
   Filters/FilterSheet 之类时才跑 filter 组，而 1.5.7 只动了 `MetalDispersion.swift`）；
   我们这轮改了 FilterSheet，filter 组照跑，所以断言得自己改成新几何。
+- **2026-10-25（1.5.8）**：2 个冲突。`CompositorApp.swift` 里两边各加了一个成员——
+  我们拆出 `deleteLayerTitle`（每句单独进目录，中文语序才排得开），上游拆出
+  `filterMenuItem`（滤镜菜单统一走它）。两个都留，但上游那个的标题要改取
+  `localizedName`，不能照抄它的 `rawValue`。appcast 取我们的。
+  这轮上游把工程格式版本提到 18（Vignette、Lens Effects、Tonal Contrast 成了调整
+  图层），顺带修好了 1.5.4 与 1.5.5 存的工程打不开的问题。**格式版本跟着上游走，
+  fork 不单独 +1**——单独加会让工程文件与上游互不兼容。中文的工程格式文档此前只
+  写到版本 11（落后 6 个版本），这轮补齐到 18。
+  Prism 改了行为：单双向可选、Offset 为 0 也生效、Blur 取代 Reach。带来 8 条新文案、
+  5 条废弃文案（旧的 Reach 与两条 Threshold 说明）。
 
 ---
 

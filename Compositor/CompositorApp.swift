@@ -15,6 +15,12 @@ struct CompositorApp: App {
         if session.isMaskSelected, session.activeLayer.flatMap({ session.selectedMask(for: $0) }) != nil { return L10n.string("Delete Layer Mask") }
         return session.selectedLayerIDs.count > 1 ? L10n.string("Delete Layers") : L10n.string("Delete Layer")
     }
+
+    /// 滤镜菜单里的一项。标题取显示名（rawValue 是存档值，永远保持英文）。
+    private func filterMenuItem(_ kind: FilterKind) -> some View {
+        Button { session.beginFilter(kind) } label: { Text(verbatim: kind.localizedName + "…") }
+            .disabled(!(kind == .vignette ? session.canVignette : session.canAdjustColors) || session.hueSaturation != nil)
+    }
     var body: some Scene {
         Window("Compositor", id: "editor") {
             ProjectWorkspaceView(applicationDelegate: applicationDelegate).roundedControls()
@@ -371,10 +377,12 @@ struct CompositorApp: App {
                         // ⌃⌘F, as in Photoshop; ⌘F is the command palette.
                         .configuredKeyboardShortcut("f", modifiers: [.command, .control]).disabled(!session.canRepeatLastFilter)
                     Divider()
-                    ForEach(FilterKind.allCases.filter { $0 != .contentAwareFill && !$0.isImageAdjustment }, id: \.self) { kind in
-                        Button { session.beginFilter(kind) } label: { Text(verbatim: kind.localizedName + "…") }
-                            .disabled(!(kind == .vignette ? session.canVignette : session.canAdjustColors) || session.hueSaturation != nil)
-                    }
+                    // Those that can also be adjustment layers, in that menu's order, then the rest.
+                    let layered = AdjustmentKind.filters.compactMap(\.filterKind)
+                    let others = FilterKind.allCases.filter { $0 != .contentAwareFill && !$0.isImageAdjustment && !layered.contains($0) }
+                    ForEach(layered, id: \.self) { filterMenuItem($0) }
+                    Divider()
+                    ForEach(others, id: \.self) { filterMenuItem($0) }
                 }
                 CommandMenu("Layer") {
                     Menu("New Adjustment Layer") {

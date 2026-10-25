@@ -1,10 +1,10 @@
-# Compositor 工程格式，版本 1–11
+# Compositor 工程格式，版本 1–18
 
 > 🌐 **English**：[docs/project-format.md](docs/project-format.md) ｜ 简体中文（当前文件）
 
 `.comp` 文件是一个 macOS 文档包，其中包含 `manifest.json` 和一个 `images/` 目录，目录内是按 `<layer UUID>.png` 命名的资产。
 
-manifest 标识为 `com.compositor.project`，新保存的版本号为 `11`（版本 `1`–`10` 仍然可读），采用 sRGB 工作色彩空间。它存储文档 UUID、像素尺寸、激活图层 UUID，以及从下到上排列的图层。每个图层存储 UUID、名称、可见性、变换（origin、size、顺时针旋转、翻转、采样方式）以及可选的图像文件名。空白图层没有图像资产。
+manifest 标识为 `com.compositor.project`，新保存的版本号为 `18`（版本 `1`–`17` 仍然可读），采用 sRGB 工作色彩空间。它存储文档 UUID、像素尺寸、激活图层 UUID，以及从下到上排列的图层。每个图层存储 UUID、名称、可见性、变换（origin、size、顺时针旋转、翻转、采样方式）以及可选的图像文件名。空白图层没有图像资产。
 
 内嵌的 PNG 保留源像素和透明度；变换信息独立存储。工程在被移动或删除导入的源照片后仍能存活。保存采用协调的原子包替换。在替换活动文档之前，不支持的版本、无效的元数据、缺失的资源、不安全的路径以及过大的数据都会被拒绝。
 
@@ -52,3 +52,17 @@ UI 术语：这些 alpha 链接就是剪贴蒙版。Option 点击可以为下方
 ### 图层效果
 
 可选的 `effects` 记录包含独立的 `stroke`、`shadow`、`colorOverlay`、`innerShadow`、`outerGlow` 与 `innerGlow` 记录。Stroke 包含大小（0–500 图层像素）、颜色、不透明度以及一个 `inside` 标志（描边位于边的内侧还是外侧）；drop shadow 与 inner shadow 各包含角度、距离、模糊、颜色与不透明度；color overlay 包含颜色与不透明度；outer glow 与 inner glow 各包含大小（0–500 图层像素）、颜色与不透明度。每个效果都支持可选的 `enabled` 可见性（缺失即默认可见）；隐藏的效果仍保留所有参数，并列在其图层之下。效果（包括它们的可见性）会被保存并参与文档撤销。画布预览在串行后台 worker 上运行，使用共享的像素预算；导出时以全分辨率渲染效果。省略某项效果的记录意味着该图层没有该效果，旧读取器只会看到它们理解的效果而忽略其余部分。
+
+版本 12 允许图层的图像文件是 16 位 PNG：即 16 位图层，它的像素每个通道保持 16 位（sRGB，alpha 像所有 PNG 图层一样是预乘的），显示与编辑时通过一份复制到 8 位并加细微噪声的副本进行，副本在载入时重新生成而不是存进工程。蒙版仍是 8 位。清单本身没有变化：PNG 自身的位深就说明了它是哪种图层。声明版本 1–11 的文件不能包含 16 位图像，旧版本应用会拒绝版本 12。
+
+版本 13 允许图层的图像文件是 OpenEXR，命名为 `<layer UUID>.exr`：即 HDR 图层，它的像素用半精度浮点保存扩展 sRGB 中比白还亮的光（白为 1）。它同样通过一份裁到白色范围、加细微噪声并舍入到 8 位的副本显示与编辑，副本在载入时重新生成。所有数值都不超过白色的 EXR 会作为 16 位图层载入。蒙版仍是 8 位 PNG。声明版本 1–12 的文件不能包含 EXR 图像，旧版本应用会拒绝版本 13。
+
+版本 14 在图层的 `shape` 样式上增加了可选的 `smoothing`。为 true 时矩形角按 Figma 风格的 60% 平滑绘制（与 iOS 的圆角连续体一致）；为 false 或缺失时保持圆形角。半径仍以文档像素计，而平滑度会在角落空间不足时减小。绘制预览与缩放重绘使用同一套几何。声明版本 1–13 的文件不能启用平滑，旧版本应用会拒绝版本 14。
+
+版本 15 允许线条在其 `shape` 样式里带上 `lineStyle`（`Solid`、`Dashed`、`Long Dash` 或 `Dotted`，虚线以线宽的倍数计量）与 `lineCap`（`Square` 或 `Round`，作用在线条两端与每一段虚线和点上）。缺失即实线圆头，与版本 15 之前的每条线一致（新建的线从方头开始）；其他形状类型不能带这两个字段。声明 1–14 的文件不能包含它们，旧版本应用会拒绝版本 15，而不是读不懂这些值。
+
+版本 16 从滤镜菜单增加了三种调整类型：`Progressive Blur`、`Bloom / Glow` 与 `RGB Split`。它们的设置放在该调整可选的 `filterLayerSettings` 里：`progressiveFrom` 与 `progressiveTo`（0–250 文档像素）、`progressiveStart` 与 `progressiveEnd`（文档点）、`progressiveRadial`、`progressiveInverted`；`bloomAmount`（0–100）与 `bloomRadius`（1–150）；`rgbSplitDistance`（0–200）、`rgbSplitBlur`（0–400）、`rgbSplitAngle`（−180 到 180 度）、`rgbSplitRadial`、`rgbSplitCenter`（一个文档点）与 `rgbSplitReach`（从中心起算、Radial 的完整距离所到的文档像素）。声明版本 1–15 的文件不能包含这些类型或 `filterLayerSettings`，旧版本应用会拒绝版本 16。
+
+版本 17 允许图像图层是动画 GIF，通过可选的 `gif` 对象实现（组、调整图层、文字与形状都不能带它）。`sourceFile` 是 `images/` 下的 `<layer UUID>.gif`，原封不动保留原始 GIF；`selectedFrameIndex` 是当前显示的那一帧，它的像素放在该图层普通的 `imageFile` 里；图层的变换、不透明度、效果与蒙版作用于每一帧。可选字段：`geometry`（图像大小的输出 `width` 与 `height`，以及从源图归一化坐标到输出坐标的仿射映射 `a`、`b`、`c`、`d`、`tx`、`ty`，可选带 `sampling`）、`framePixels`（编辑过的帧，每帧 `{ "index": 1, "imageFile": "<layer UUID>.frame-1.png" }`；其余帧从源文件解码）、`deletedFrameIndices`（被删掉的源帧）、`frameOrder`（播放顺序，每帧 `{ "index": 4, "sourceIndex": 1 }`；复制出来的帧取源帧数以上的下标，低于 8,192）与 `timing`（`mode` 为 `Frame delay` 或 `Same for all`，`uniformDelay` 以秒计，`frameDelays` 覆盖 `{ "index": 4, "duration": 0.16 }`；延时为 0.02–655.35 秒）。一个 GIF 最多 4,096 帧。声明版本 1–16 的文件不能包含 `gif`，旧版本应用会拒绝版本 17。
+
+版本 18 从滤镜菜单增加了三种调整类型：`Vignette`、`Lens Effects` 与 `Tonal Contrast`。每一种都把自己的设置放在该调整的 `filterLayerSettings` 里独立的对象中：`vignette`（`amount` 0–100、`color`（含 `red`、`green`、`blue` 0–1）、`midpoint` 0–100、`roundness` −100–100、`feather` 0–100、`highlights` 0–100；它给整个画布加边框，只给已在那里的像素重新着色）、`tonal`（`amount` 0–100、`radius` 1–100 文档像素、`shadows`、`midtones`、`highlights` −100–100）与 `lens`（`effect` 为 `Anamorphic Flare`、`Starburst`、`Mist`、`Prism` 或 `Bokeh`，并带该效果自己的设置：`threshold` 50–100；`flareAmount` 0–100、`flareLength` 1–100 与 `flareBlue` 0–100；`starAmount` 0–100、`starLength` 2–40、`starPoints` 4、6、8、12 或 14、`starAngle` −180–180；`mistStrength` 与 `mistSize` 0–100；`prismAmount` 0–100、`prismCopies` 1–8、`prismOffset` 0–50、`prismAngle` −180–180、`prismBothWays`、`prismBlur` 0–100；`bokehRadius` 0.5–6、`bokehBrightness` 与 `bokehRing` 0–100、`bokehShape` 为 `Round`、`Hexagon`、`Oval` 或 `Cat's Eye`）。以百分比给出的长度都是文档长边的百分比。`lens` 里任何一项设置都可以省略，省略即取默认值。声明版本 1–17 的文件不能包含这些类型或这些对象，旧版本应用会拒绝版本 18。

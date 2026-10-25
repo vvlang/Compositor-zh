@@ -1024,6 +1024,17 @@
         }
       }
     },
+    "Both Ways": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "双向"
+          }
+        }
+      }
+    },
     "Bottom": {
       "extractionState": "manual",
       "localizations": {
@@ -2201,6 +2212,17 @@
         }
       }
     },
+    "Copies to one side of the picture, or out to both": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "副本只出现在画面的一侧，或同时向两侧展开"
+          }
+        }
+      }
+    },
     "Copy": {
       "extractionState": "manual",
       "localizations": {
@@ -2879,6 +2901,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "将该颜色范围之外的部分变暗。按「好」后不会保留此效果。"
+          }
+        }
+      }
+    },
+    "Direction": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "方向"
           }
         }
       }
@@ -4863,24 +4896,24 @@
         }
       }
     },
-    "How bright a light has to be to flare": {
+    "How bright a light has to be to flare; near 100, only the biggest, brightest spots": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "光线要多亮才会产生耀斑"
+            "value": "光线要多亮才会产生耀斑；接近 100 时只有最亮最大的光斑会发光"
           }
         }
       }
     },
-    "How bright a light has to be to sparkle": {
+    "How bright a light has to be to sparkle; near 100, only the biggest, brightest spots": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "光线要多亮才会闪出星芒"
+            "value": "光线要多亮才会闪出星芒；接近 100 时只有最亮最大的光斑会发光"
           }
         }
       }
@@ -4991,17 +5024,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "该调整在饱和度上的影响范围。"
-          }
-        }
-      }
-    },
-    "How far into the frame the copies show from that edge": {
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "副本从那条边向画面内延伸多远"
           }
         }
       }
@@ -7558,6 +7580,17 @@
         }
       }
     },
+    "One Way": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "单向"
+          }
+        }
+      }
+    },
     "Only print dimensions and resolution change. Pixels stay unchanged.": {
       "extractionState": "manual",
       "localizations": {
@@ -8731,17 +8764,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "比例"
-          }
-        }
-      }
-    },
-    "Reach": {
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "延伸范围"
           }
         }
       }
@@ -10330,6 +10352,17 @@
         }
       }
     },
+    "Soften the copies, more the farther they're pushed": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "把副本变柔和，推得越远越柔"
+          }
+        }
+      }
+    },
     "Softens the edge of the vignette.": {
       "extractionState": "manual",
       "localizations": {
@@ -11738,17 +11771,6 @@
         }
       }
     },
-    "Which way it's pushed, toward the edge the prism sits at": {
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "推移的方向，指向棱镜所在的那条边"
-          }
-        }
-      }
-    },
     "Which way the colors spread": {
       "extractionState": "manual",
       "localizations": {
@@ -11756,6 +11778,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "颜色往哪个方向散开"
+          }
+        }
+      }
+    },
+    "Which way the copies step": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "副本朝哪个方向错开"
           }
         }
       }

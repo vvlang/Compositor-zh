@@ -134,7 +134,7 @@ Compositor 保存的工程还会包含一个 `QuickLook` 文件夹（`Preview.jp
 ```
 
 - `ranges` 与 `channels` 按 RGB、红、绿、蓝顺序排列。曲线点的 x 从 0 到 255，且 x 必须递增。
-- `kind` 可以是以下之一：`Hue/Saturation`、`Levels`、`Curves`、`Exposure`、`Gradient Map`、`Grain`、`Invert`、`Black & White`、`Color Balance`、`Gaussian Blur`、`Motion Blur`、`Add Noise`；从清单 `version` 16 起还有 `Progressive Blur`、`Bloom / Glow` 和 `RGB Split`，它们的设置放在 `filterLayerSettings` 对象里（字段和取值范围见 [project-format.md](project-format.md)，版本 16）。
+- `kind` 可以是以下之一：`Hue/Saturation`、`Levels`、`Curves`、`Exposure`、`Gradient Map`、`Grain`、`Invert`、`Black & White`、`Color Balance`、`Gaussian Blur`、`Motion Blur`、`Add Noise`，从清单 `version` 16 起还有 `Progressive Blur`、`Bloom / Glow` 和 `RGB Split`，从 18 起还有 `Vignette`、`Lens Effects` 和 `Tonal Contrast`，它们的设置放在 `filterLayerSettings` 对象里（字段和取值范围见 [project-format.md](project-format.md)，版本 16 和 18）。
 - 对于 Hue/Saturation，请在 `adjustment` 上设置 `hue`、`saturation` 和 `lightness`。Color Balance 使用一个 `colorBalanceSettings` 对象（包含 `shadowCyanRed`、`shadowMagentaGreen`、`shadowYellowBlue`，以及 `mid` 和 `highlight` 的相同字段，每个取值范围 −100 到 100，外加 `preserveLuminosity`）。
 - 对于其他类型，获取精确形状最简单的方法是：在 Compositor 中添加一个、保存工程，然后从该工程的 manifest 中复制相应字段。
 
