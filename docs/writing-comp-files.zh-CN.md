@@ -138,6 +138,12 @@ Compositor 保存的工程还会包含一个 `QuickLook` 文件夹（`Preview.jp
 - 对于 Hue/Saturation，请在 `adjustment` 上设置 `hue`、`saturation` 和 `lightness`。Color Balance 使用一个 `colorBalanceSettings` 对象（包含 `shadowCyanRed`、`shadowMagentaGreen`、`shadowYellowBlue`，以及 `mid` 和 `highlight` 的相同字段，每个取值范围 −100 到 100，外加 `preserveLuminosity`）。
 - 对于其他类型，获取精确形状最简单的方法是：在 Compositor 中添加一个、保存工程，然后从该工程的 manifest 中复制相应字段。
 
+## GIF 图层
+
+用版本 17 或更高的版本，给普通图像图层加一个 `gif` 对象，含 `sourceFile: "<id>.gif"` 与从 0 开始的 `selectedFrameIndex`。把原始 GIF 嵌进 `images/`，并让 `imageFile: "<id>.png"` 仍然是所选那一帧未加蒙版的像素。替换清单前先保存资产。
+
+编辑工程包时保留已有的几何、帧顺序、编辑过的帧与时序；图层的那个蒙版作用于每一帧，所以绝不要把它烘进帧像素。字段与限制见 [project-format.md](project-format.md)（版本 17）。
+
 ## 更多内容
 
 - 文件夹、文字图层、图层效果以及其他格式承载的特性，详见 [project-format.zh-CN.md](project-format.zh-CN.md)。
