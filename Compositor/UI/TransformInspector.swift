@@ -19,6 +19,9 @@ struct TransformInspector: View {
               .help("Show the transform box and handles (⌘H). When hidden, drag anywhere to move the layer.")
           ScrollView(.horizontal) {
             HStack(spacing: 12) {
+              // 上游把工具栏改成两列：内层是数值组，外层装它和对齐按钮。
+              // 数值组整体要能在变形时禁用，所以它是独立的一层。
+              HStack(spacing: 12) {
                 field("X", id: "X", value: value.origin.x) { $0.origin.x = $1 }.frame(width: 85)
                 field("Y", id: "Y", value: value.origin.y) { $0.origin.y = $1 }.frame(width: 85)
                 TransformValueField(label: "W", id: "W", value: value.size.width, range: 1...30_000, finish: finish) { resize($0, width: true) }.frame(width: 85)
@@ -41,9 +44,13 @@ struct TransformInspector: View {
                 }.frame(width: 170)
                 Button("Flip H") { change { $0.flipX.toggle() } }
                 Button("Flip V") { change { $0.flipY.toggle() } }
+                Divider().frame(height: 16)
 
-            // Numbers describe an ordinary transform; while distorted, the handles are the controls.
-            }.disabled((!session.canTransform && session.transformEdit == nil) || session.transformEdit?.corners != nil)
+                // Numbers describe an ordinary transform; while distorted, the handles are the controls.
+              }.disabled((!session.canTransform && session.transformEdit == nil) || session.transformEdit?.corners != nil)
+              // Outside the group the numbers are disabled with, so a move in progress leaves it alone.
+              AlignButton(session: session)
+            }
                 .padding(.horizontal, 18)
           }.scrollIndicators(.never)
           // Only an edit that waits for them — typed values, ⌘T, a distortion — has anything to cancel or apply. A
@@ -148,5 +155,48 @@ struct TransformValueField: View {
     /// No trailing zeros on a whole number, two decimals otherwise.
     static func formatted(_ value: Double) -> String {
         abs(value - value.rounded()) < 0.005 ? String(Int(value.rounded())) : String(format: "%.2f", value)
+    }
+}
+
+/// The Move bar's Align button: a small panel of icons, horizontal on one row and vertical on the next, each aligning
+/// three ways and distributing two. Layers line up with
+/// the selection, with the canvas when one layer is selected, or else with each other; distributing takes three or more.
+private struct AlignButton: View {
+    @Bindable var session: EditorSession
+    @State private var showing = false
+
+    var body: some View {
+        Button("Align") { showing.toggle() }
+            .disabled(!session.canAlignLayers)
+            .help("Line layers up with each other, the selection, or the canvas when one is selected")
+            .popover(isPresented: $showing, arrowEdge: .bottom) {
+                // Horizontal on the top row, vertical below: align three ways, then distribute two.
+                VStack(alignment: .leading, spacing: 6) {
+                    row([.left, .horizontalCenter, .right], [.horizontalCenters, .horizontalSpacing])
+                    row([.top, .verticalCenter, .bottom], [.verticalCenters, .verticalSpacing])
+                }
+                .padding(8)
+            }
+    }
+
+    private func row(_ alignments: [LayerAlignment], _ distributions: [LayerDistribution]) -> some View {
+        HStack(spacing: 2) {
+            ForEach(alignments, id: \.self) { alignment in
+                icon(alignment.symbol, "Align " + alignment.rawValue) { session.alignLayers(alignment) }
+            }
+            ForEach(distributions, id: \.self) { distribution in
+                icon(distribution.symbol, "Distribute " + distribution.rawValue + " (three or more layers)") {
+                    session.distributeLayers(distribution)
+                }
+                .disabled(!session.canDistributeLayers)
+            }
+        }
+    }
+
+    private func icon(_ symbol: String, _ title: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: symbol).font(.system(size: 15)).frame(width: 30, height: 28).contentShape(Rectangle())
+        }
+        .buttonStyle(.borderless).help(title).accessibilityLabel(title)
     }
 }

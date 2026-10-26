@@ -485,6 +485,17 @@
         }
       }
     },
+    "Align": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "对齐"
+          }
+        }
+      }
+    },
     "Align %@": {
       "extractionState": "extracted",
       "localizations": {
@@ -492,6 +503,72 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@对齐"
+          }
+        }
+      }
+    },
+    "Align Bottom Edges": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "对齐下边缘"
+          }
+        }
+      }
+    },
+    "Align Horizontal Centers": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "对齐水平中心"
+          }
+        }
+      }
+    },
+    "Align Left Edges": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "对齐左边缘"
+          }
+        }
+      }
+    },
+    "Align Right Edges": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "对齐右边缘"
+          }
+        }
+      }
+    },
+    "Align Top Edges": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "对齐上边缘"
+          }
+        }
+      }
+    },
+    "Align Vertical Centers": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "对齐垂直中心"
           }
         }
       }
@@ -2967,6 +3044,61 @@
           "stringUnit": {
             "state": "translated",
             "value": "畸变"
+          }
+        }
+      }
+    },
+    "Distribute": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "分布"
+          }
+        }
+      }
+    },
+    "Distribute Horizontal Centers": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "分布水平中心"
+          }
+        }
+      }
+    },
+    "Distribute Horizontal Spacing": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "分布水平间距"
+          }
+        }
+      }
+    },
+    "Distribute Vertical Centers": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "分布垂直中心"
+          }
+        }
+      }
+    },
+    "Distribute Vertical Spacing": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "分布垂直间距"
           }
         }
       }
@@ -6102,6 +6234,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "行高（基线到基线）。留空或填 0 为自动：字号的 120%。"
+          }
+        }
+      }
+    },
+    "Line layers up with each other, the selection, or the canvas when one is selected": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "让图层彼此对齐；选中某个图层时，对齐到选区或画布"
           }
         }
       }

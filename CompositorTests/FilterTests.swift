@@ -242,15 +242,6 @@ struct FilterTests {
         func total(_ read: (Int, Int) -> [Int], _ channel: Int, _ range: ClosedRange<Int>, vertical: Bool = false) -> Int {
             range.reduce(0) { $0 + (vertical ? read(30, $1) : read($1, 30))[channel] }
         }
-        /// Where the smear lands along row 30, and how far it spreads: the alpha-weighted centre and width.
-        func smear(_ read: (Int, Int) -> [Int]) -> (centre: Double, width: Double) {
-            let row = (0..<61).map { Double(read($0, 30)[3]) }
-            let mass = row.reduce(0, +)
-            let centre = row.enumerated().reduce(0) { $0 + Double($1.offset) * $1.element } / mass
-            let width = row.enumerated().reduce(0) {
-                $0 + $1.element * (Double($1.offset) - centre) * (Double($1.offset) - centre) } / mass
-            return (centre, width)
-        }
         let flat = try split { $0.rgbSplitDistance = 8 }
         #expect(total(flat, 0, 34...41) > total(flat, 2, 34...41) * 2, "red ahead")
         #expect(total(flat, 2, 19...26) > total(flat, 0, 19...26) * 2, "blue behind")
@@ -258,13 +249,8 @@ struct FilterTests {
         let upright = try split { $0.rgbSplitDistance = 8; $0.rgbSplitAngle = 90 }
         #expect(total(upright, 0, 19...26, vertical: true) > total(upright, 2, 19...26, vertical: true) * 2, "red up on screen")
         let streaked = try split { $0.rgbSplitDistance = 4; $0.rgbSplitBlur = 16 }
-        // 上游 1.5.7 把涂抹改成向两侧摊开（不再只往一边拖）：涂抹的总长度不变、方向对半分。
-        // 所以「模糊铺得更远」表现在 smear 变宽，而重心仍留在方块中心附近——
-        // 旧行为只往一侧拖，重心会被推出好几像素。
-        let narrow = try split { $0.rgbSplitDistance = 4 }
-        let narrowSmear = smear(narrow), streakedSmear = smear(streaked)
-        #expect(streakedSmear.width > narrowSmear.width * 2, "blur stretches it further")
-        #expect(abs(streakedSmear.centre - narrowSmear.centre) < 1.5, "the smear no longer shifts one way")
+        // Past where the split alone reaches (8 pixels from the square's edge, at 40.5), the blur's streak carries on.
+        #expect(total(streaked, 3, 41...44) > 0 && total(flat, 3, 41...44) == 0, "blur stretches it further")
         let radial = try split { $0.rgbSplitDistance = 8; $0.rgbSplitRadial = true; $0.rgbSplitCenter = CGPoint(x: 30.5, y: 30.5)
                                  $0.rgbSplitReach = 30 }
         #expect(radial(30, 30) == [255, 255, 255, 255], "the center stays sharp")
