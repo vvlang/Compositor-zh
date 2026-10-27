@@ -2509,6 +2509,28 @@
         }
       }
     },
+    "Custom ratio": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自定义比例"
+          }
+        }
+      }
+    },
+    "Custom…": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自定义…"
+          }
+        }
+      }
+    },
     "Cut": {
       "extractionState": "manual",
       "localizations": {
@@ -3763,6 +3785,17 @@
         }
       }
     },
+    "Enter a positive ratio within the document size limits.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请输入文档尺寸范围内的正比例。"
+          }
+        }
+      }
+    },
     "Enter a size up to %@ pixels at this DPI.": {
       "extractionState": "extracted",
       "localizations": {
@@ -4192,7 +4225,7 @@
         }
       }
     },
-    "Flip H": {
+    "Flip Horizontal": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -4225,7 +4258,7 @@
         }
       }
     },
-    "Flip V": {
+    "Flip Vertical": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -4364,6 +4397,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "自由套索"
+          }
+        }
+      }
+    },
+    "Fringe": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "色散"
           }
         }
       }
@@ -5248,6 +5292,17 @@
         }
       }
     },
+    "How fine the detail it sharpens: small for crisp texture, larger for a punchier look": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "锐化的细节有多细：数值小纹理更锐利，数值大效果更强烈"
+          }
+        }
+      }
+    },
     "How long each frame shows": {
       "extractionState": "manual",
       "localizations": {
@@ -5332,6 +5387,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "套用多少镜头配置文件的暗角校正。"
+          }
+        }
+      }
+    },
+    "How strongly edges and fine detail are brought out": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "边缘和细节被凸出的强度"
           }
         }
       }
@@ -10550,6 +10616,17 @@
         }
       }
     },
+    "Split each copy's red and blue apart, as glass does; 0 keeps the copies crisp": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "像玻璃那样把每个副本的红蓝分开；0 表示副本保持锐利"
+          }
+        }
+      }
+    },
     "Split the layer's original channels into four grayscale layers, Red, Green, Blue and Alpha, for Export As › Channel Pack. Color under fully transparent pixels can't be recovered": {
       "extractionState": "manual",
       "localizations": {
@@ -12024,6 +12101,28 @@
         }
       }
     },
+    "Width:Height": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "宽:高"
+          }
+        }
+      }
+    },
+    "Width:height, such as 4:5 or 3:2": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "宽:高，例如 4:5 或 3:2"
+          }
+        }
+      }
+    },
     "Wobble": {
       "extractionState": "manual",
       "localizations": {
@@ -12273,17 +12372,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "sRGB · 透明"
-          }
-        }
-      }
-    },
-    "°": {
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "°"
           }
         }
       }

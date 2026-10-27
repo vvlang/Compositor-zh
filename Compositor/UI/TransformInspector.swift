@@ -19,37 +19,43 @@ struct TransformInspector: View {
               .help("Show the transform box and handles (⌘H). When hidden, drag anywhere to move the layer.")
           ScrollView(.horizontal) {
             HStack(spacing: 12) {
-              // 上游把工具栏改成两列：内层是数值组，外层装它和对齐按钮。
-              // 数值组整体要能在变形时禁用，所以它是独立的一层。
-              HStack(spacing: 12) {
-                field("X", id: "X", value: value.origin.x) { $0.origin.x = $1 }.frame(width: 85)
-                field("Y", id: "Y", value: value.origin.y) { $0.origin.y = $1 }.frame(width: 85)
-                TransformValueField(label: "W", id: "W", value: value.size.width, range: 1...30_000, finish: finish) { resize($0, width: true) }.frame(width: 85)
-                TransformValueField(label: "H", id: "H", value: value.size.height, range: 1...30_000, finish: finish) { resize($0, width: false) }.frame(width: 85)
+            HStack(spacing: 12) {
+                field("X", id: "X", value: value.origin.x) { $0.origin.x = $1 }.fixedSize()
+                field("Y", id: "Y", value: value.origin.y) { $0.origin.y = $1 }.fixedSize()
+                TransformValueField(label: "W", id: "W", fieldWidth: Self.longField, value: value.size.width, range: 1...30_000, finish: finish) { resize($0, width: true) }.fixedSize()
+                TransformValueField(label: "H", id: "H", fieldWidth: Self.longField, value: value.size.height, range: 1...30_000, finish: finish) { resize($0, width: false) }.fixedSize()
                 // Shift flips the lock while dragging a handle, and the button shows it flipped.
                 Toggle(isOn: Binding(get: { session.locksTransformRatio != held.contains(.shift) },
                                      set: { session.locksTransformRatio = $0 != held.contains(.shift) })) { Image(systemName: "link") }
                     .toggleStyle(.button).help("Lock aspect ratio. Hold Shift while dragging a handle to turn it the other way.")
-                TransformValueField(label: "Scale", id: "scale", suffix: "%", value: value.scalePercent(pixelSize: pixelSize), range: 0.1...30_000, finish: finish) { number in
+                TransformValueField(label: "Scale", id: "scale", suffix: "%", fieldWidth: Self.shortField, value: value.scalePercent(pixelSize: pixelSize), range: 0.1...30_000, finish: finish) { number in
                     change { value in
                         guard number > 0 else { return }
                         value = value.scaled(toPercent: number, pixelSize: pixelSize)
                     }
-                }.frame(width: 110).help("Scale width and height together, about the center")
-                field("°", id: "angle", value: value.rotation, range: -360...360) { $0.rotation = $1.truncatingRemainder(dividingBy: 360) }.frame(width: 75)
+                }.fixedSize().help("Scale width and height together, about the center")
+                TransformValueField(label: "°", id: "angle", fieldWidth: Self.shortField, value: value.rotation, range: -360...360, finish: finish) { number in
+                    change { $0.rotation = number.truncatingRemainder(dividingBy: 360) }
+                }.fixedSize()
                 Picker("Sampling", selection: Binding(get: { value.sampling }, set: { sampling in
                     change { $0.sampling = sampling }
                 })) {
                     ForEach(LayerSampling.allCases, id: \.self) { Text(verbatim: $0.localizedName).tag($0) }
                 }.frame(width: 170)
-                Button("Flip H") { change { $0.flipX.toggle() } }
-                Button("Flip V") { change { $0.flipY.toggle() } }
+                Button { change { $0.flipX.toggle() } } label: {
+                    Image(systemName: "arrow.left.and.right.righttriangle.left.righttriangle.right")
+                }
+                .help("Flip Horizontal").accessibilityLabel("Flip Horizontal")
+                Button { change { $0.flipY.toggle() } } label: {
+                    Image(systemName: "arrow.up.and.down.righttriangle.up.righttriangle.down")
+                }
+                .help("Flip Vertical").accessibilityLabel("Flip Vertical")
                 Divider().frame(height: 16)
 
-                // Numbers describe an ordinary transform; while distorted, the handles are the controls.
-              }.disabled((!session.canTransform && session.transformEdit == nil) || session.transformEdit?.corners != nil)
-              // Outside the group the numbers are disabled with, so a move in progress leaves it alone.
-              AlignButton(session: session)
+            // Numbers describe an ordinary transform; while distorted, the handles are the controls.
+            }.disabled((!session.canTransform && session.transformEdit == nil) || session.transformEdit?.corners != nil)
+            // Outside the group the numbers are disabled with, so a move in progress leaves it alone.
+            AlignButton(session: session)
             }
                 .padding(.horizontal, 18)
           }.scrollIndicators(.never)
@@ -71,11 +77,16 @@ struct TransformInspector: View {
     /// 100% scale: the layer's pixels (a blank layer's size before this edit, so typing doesn't compound).
     private var held: NSEvent.ModifierFlags { HeldModifiers.shared.flags }
     private var pixelSize: CGSize { session.transformPixelSize ?? session.activeLayer?.size ?? value.size }
+    /// Room for four digits, for Scale and rotation, and six and a half for position and size, which run to five and a
+    /// sign or a decimal: 7.6 points a digit at the bar's 12-point text, and 8 for a field border's padding.
+    static let shortField: CGFloat = 38
+    static let longField: CGFloat = 57
+
     /// `id` 单独传，因为辅助功能标识符必须跨语言稳定，不能由可翻译的标题推出来。
     private func field(_ label: String.LocalizationValue, id: String, value: CGFloat,
                        range: ClosedRange<CGFloat> = -30_000...30_000,
                        set: @escaping (inout LayerTransform, CGFloat) -> Void) -> some View {
-        TransformValueField(label: label, id: id, value: value, range: range, finish: finish) { number in change { set(&$0, number) } }
+        TransformValueField(label: label, id: id, fieldWidth: Self.longField, value: value, range: range, finish: finish) { number in change { set(&$0, number) } }
     }
     /// A value typed, stepped or dragged shows on the canvas as it changes, and is applied without Cancel or Apply —
     /// a transform never resamples the layer's pixels, so there is nothing to confirm — as one undo step once the
@@ -112,11 +123,16 @@ struct TransformInspector: View {
 struct TransformValueField: View {
     /// 标题走目录。
     let label: String.LocalizationValue
-    /// UI 测试用的辅助功能标识符，与可翻译的标题分开。上游是从标题派生的
-    /// （"transform\(label)"），那在英文标题下才稳定——标题一汉化，
-    /// 标识符就变成中文，UI 测试找不到控件。
+    /// UI 测试用的辅助功能标识符。上游是从标题派生的（"transform\(label)"），
+    /// 那是英文标题才稳定的做法——标题一汉化，标识符就变成中文，UI 测试
+    /// 就找不到控件了。所以这里单独传。
+    ///
+    /// 声明在带默认值的参数之前：Swift 要求调用处的实参顺序跟声明一致，
+    /// 而 id 总是要传的，不该排在有默认值的参数后面。
     let id: String
     var suffix: String? = nil
+    /// The text box's own width, when it's narrower than the space it's given: Scale and rotation take four digits.
+    var fieldWidth: CGFloat? = nil
     let value: CGFloat
     let range: ClosedRange<CGFloat>
     /// The field is done with its value: a drag on its label let go, or the field left.
@@ -134,6 +150,7 @@ struct TransformValueField: View {
                 }), range: range, step: 1, onEnd: finish)
             TextField(String(localized: label), text: $text)
                 .textFieldStyle(.roundedBorder).focused($focused)
+                .frame(width: fieldWidth)
                 .accessibilityIdentifier("transform\(id)")
                 .onAppear { sync() }
                 .onChange(of: value) { if !focused { sync() } }
