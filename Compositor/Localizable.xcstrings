@@ -320,6 +320,17 @@
         }
       }
     },
+    "Add Light": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加灯光"
+          }
+        }
+      }
+    },
     "Add Mask": {
       "extractionState": "manual",
       "localizations": {
@@ -1464,6 +1475,17 @@
         }
       }
     },
+    "Choke": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "收束"
+          }
+        }
+      }
+    },
     "Choose a custom grid color": {
       "extractionState": "manual",
       "localizations": {
@@ -1548,6 +1570,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "选择晕影颜色"
+          }
+        }
+      }
+    },
+    "Choose this light's color": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择这盏灯的颜色"
           }
         }
       }
@@ -4159,6 +4192,17 @@
         }
       }
     },
+    "Finding the subject…": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在寻找主体…"
+          }
+        }
+      }
+    },
     "Finish editing text": {
       "extractionState": "manual",
       "localizations": {
@@ -5270,6 +5314,17 @@
         }
       }
     },
+    "How far the light wraps around the subject's edges": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "灯光沿着主体边缘包裹的范围"
+          }
+        }
+      }
+    },
     "How far the spikes reach": {
       "extractionState": "manual",
       "localizations": {
@@ -5398,6 +5453,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "边缘和细节被凸出的强度"
+          }
+        }
+      }
+    },
+    "How the light ends on the inside: low feathers it off softly from the edge, high holds it bright and ends it crisply": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "灯光在靠内一侧如何收尾：低值从边缘柔和地晕开，高值保持明亮并利落地收住"
           }
         }
       }
@@ -6106,6 +6172,17 @@
         }
       }
     },
+    "Let the lights glow in the air around the subject, blending them into the background": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "让灯光在主体周围的光线中发亮，融入背景"
+          }
+        }
+      }
+    },
     "Levels": {
       "extractionState": "manual",
       "localizations": {
@@ -6146,6 +6223,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "光线"
+          }
+        }
+      }
+    },
+    "Light %@": {
+      "extractionState": "extracted",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "灯光 %@"
           }
         }
       }
@@ -6212,6 +6300,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "深底亮字"
+          }
+        }
+      }
+    },
+    "Light the subject from another side as well": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从另一侧也给主体打光"
           }
         }
       }
@@ -9230,6 +9329,17 @@
         }
       }
     },
+    "Remove this light": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除这盏灯"
+          }
+        }
+      }
+    },
     "Remove this shortcut": {
       "extractionState": "manual",
       "localizations": {
@@ -11987,6 +12097,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "填入 %@ 通道的内容：按灰度读取的图层或组，或纯黑、纯白"
+          }
+        }
+      }
+    },
+    "Where the light comes from, behind the subject: 0° from the right, 90° from above": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "灯光从主体背后哪个方向来：0° 为正右方，90° 为正上方"
           }
         }
       }
