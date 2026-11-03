@@ -7,10 +7,12 @@ struct EditorCanvas: NSViewRepresentable {
     func updateNSView(_ view: CanvasView, context: Context) {
         view.consumeFocusRequest(session.canvasFocusRequest)
         _ = session.showsTransformControls // observed here so ⌘H redraws the transform box at once
+        _ = session.hiddenSelectionEdges // and the selection's outline
         _ = session.showsGrid
         _ = session.layoutGrid
         _ = session.gridAppearance
         _ = session.showsGuides
+        _ = session.extrasHideGuides
         _ = session.guideDrag
         _ = session.document?.guides
         view.synchronizeDisplay()
@@ -27,13 +29,17 @@ final class CanvasView: NSView {
     private var adjustmentCache: [UUID: (key: [String], image: CIImage)] = [:]
     /// Off, each adjustment is computed every frame, as before the cache: for comparing the two.
     var cachesAdjustments = true
-    /// A Lens Effects layer's picture made as Copy Merged and the export make it — everything up to and including the
-    /// layer, at the document's own pixels, by the same code — with what it was made from. Shown in place of the
-    /// canvas's own working while that still matches, so what's on screen is what copying it gives.
-    private var lensExact: [UUID: (key: [String], image: CGImage)] = [:]
-    /// What each Lens Effects layer was made from on the last frame, and the one waiting to be made exactly.
-    private var lensLatest: [UUID: [String]] = [:]
-    private var lensWaiting: [UUID: [String]] = [:]
+    /// A Reduce Noise or Lens Effects layer's picture: what's under it, worked on at the document's own pixels by the
+    /// export's code, with what it was made from. Placed each frame while that still matches, rather than worked out
+    /// again for every pan and zoom: its key leaves out the frame, which only places it.
+    private var exactAdjustments: [UUID: (key: [String], image: CGImage)] = [:]
+    /// What each such layer was made from on the last frame, and the one waiting to be made.
+    private var exactLatest: [UUID: [String]] = [:]
+    private var exactWaiting: [UUID: [String]] = [:]
+    /// Whether every Reduce Noise and Lens Effects layer on the last frame has its picture made for what it showed.
+    var adjustmentsSettled: Bool { exactLatest.allSatisfy { exactAdjustments[$0.key]?.key == $0.value } }
+    /// The adjustments too slow to work out every frame, which `exactAdjustments` keeps instead.
+    private static let keptExactly: Set<AdjustmentKind> = [.reduceNoise, .lensEffects]
     /// The effects rendered for the text being edited, and what they were rendered from.
     private var draftEffects: (image: CGImage, effects: LayerEffects, transform: LayerTransform, rendered: CGImage, inset: CGFloat)?
     /// Which layer and text `draftEffects` were made for, so they can stand in once the edit is committed.
@@ -119,6 +125,8 @@ final class CanvasView: NSView {
     private var progressiveDrag: GradientHandle?
     /// RGB Split's center being dragged.
     private var rgbSplitDrag = false
+    /// Volumetric Light's light being dragged on the canvas.
+    private var volumetricDrag = false
     private var antsTimer: Timer?
     private var modifierMonitor: Any?
     private var sampleClickMonitor: Any?
@@ -140,6 +148,9 @@ final class CanvasView: NSView {
     private var marqueeConstrainArmed = true
     /// The Marquee draft's latest drag point, so a Shift change can reshape it without a mouse move.
     private var marqueeDragPixel: CGPoint?
+    /// Where the pointer and the Marquee's starting corner were when Space went down mid-drag: while it's held, the box
+    /// moves with the pointer rather than resizing, as in Photoshop.
+    private var marqueeMoveStart: (pixel: CGPoint, anchor: CGPoint, size: CGSize)?
     /// While a Marquee is dragged against or past the canvas edge, pans the view toward the pointer.
     private var marqueeAutoscroll: Timer?
     private var marqueeAutoscrollPoint: CGPoint?
@@ -1828,6 +1839,12 @@ final class CanvasView: NSView {
             synchronizeDisplay()
             return
         }
+        if session.filterEdit?.kind == .volumetricLight, !spaceHeld, let document = session.document {
+            session.moveVolumetricLight(to: session.viewport.documentPoint(from: point, documentSize: document.size))
+            volumetricDrag = true
+            synchronizeDisplay()
+            return
+        }
         if session.levels?.sampleMode != nil, !spaceHeld, let document = session.document {
             session.sampleLevels(at: session.viewport.documentPoint(from: point, documentSize: document.size))
             FloatingPanelController.refocus(NSUserInterfaceItemIdentifier("levelsPanel"))
@@ -1924,6 +1941,11 @@ final class CanvasView: NSView {
         }
         if rgbSplitDrag, let document = session.document {
             session.moveRGBSplitCenter(to: session.viewport.documentPoint(from: point, documentSize: document.size))
+            synchronizeDisplay()
+            return
+        }
+        if volumetricDrag, let document = session.document {
+            session.moveVolumetricLight(to: session.viewport.documentPoint(from: point, documentSize: document.size))
             synchronizeDisplay()
             return
         }
@@ -2140,8 +2162,9 @@ final class CanvasView: NSView {
         window?.invalidateCursorRects(for: self)
     }
     override func mouseUp(with event: NSEvent) {
-        if rgbSplitDrag {
+        if rgbSplitDrag || volumetricDrag {
             rgbSplitDrag = false
+            volumetricDrag = false
             FloatingPanelController.refocus(NSUserInterfaceItemIdentifier("filterPanel"))
             return
         }
@@ -2341,6 +2364,8 @@ final class CanvasView: NSView {
         } else if event.keyCode == 49 {
             panPhysicalKey = physicalKey
             spaceHeld = true
+            // Drawing a Marquee, Space moves the box rather than panning: the cursor stays as it is.
+            if session.lassoDraft?.anchor != nil { return }
             updateBrushCursor()
             window?.invalidateCursorRects(for: self)
             refreshPointerCursor()
@@ -2385,6 +2410,7 @@ final class CanvasView: NSView {
         if event.keyCode == panPhysicalKey || (panPhysicalKey == nil && event.keyCode == 49) {
             panPhysicalKey = nil
             spaceHeld = false
+            if session.lassoDraft?.anchor != nil { return }
             updateBrushCursor()
             window?.invalidateCursorRects(for: self)
             refreshPointerCursor()
@@ -2479,8 +2505,23 @@ final class CanvasView: NSView {
 
     private func dragMarqueeDraft(to pixel: CGPoint, flags: NSEvent.ModifierFlags) {
         if !flags.contains(.shift) { marqueeConstrainArmed = true }
-        marqueeDragPixel = pixel
-        session.dragMarquee(to: snappedCorner(pixel, flags: flags), square: marqueeConstrainArmed && flags.contains(.shift), fromCenter: false)
+        defer { marqueeDragPixel = pixel }
+        guard spaceHeld, let draft = session.lassoDraft, let anchor = draft.anchor, let first = draft.points.first else {
+            marqueeMoveStart = nil
+            session.dragMarquee(to: snappedCorner(pixel, flags: flags), square: marqueeConstrainArmed && flags.contains(.shift), fromCenter: false)
+            return
+        }
+        // Space held: the box keeps its size and follows the pointer, its corners on whole pixels.
+        if marqueeMoveStart == nil {
+            let box = draft.points.dropFirst().reduce(CGRect(origin: first, size: .zero)) { $0.union(CGRect(origin: $1, size: .zero)) }
+            let far = CGPoint(x: anchor.x == box.minX ? box.maxX : box.minX, y: anchor.y == box.minY ? box.maxY : box.minY)
+            marqueeMoveStart = (marqueeDragPixel ?? pixel, anchor, CGSize(width: far.x - anchor.x, height: far.y - anchor.y))
+        }
+        guard let start = marqueeMoveStart else { return }
+        let moved = CGPoint(x: (start.anchor.x + pixel.x - start.pixel.x).rounded(), y: (start.anchor.y + pixel.y - start.pixel.y).rounded())
+        session.snapGuides = ([], [])
+        session.moveMarqueeAnchor(to: moved)
+        session.dragMarquee(to: CGPoint(x: moved.x + start.size.width, y: moved.y + start.size.height), square: false, fromCenter: false)
     }
 
     /// Freehand starts an outline to drag. Polygonal adds a corner per click and closes on
@@ -2491,6 +2532,7 @@ final class CanvasView: NSView {
         // A Shift held at the press means Add; for the Marquee it squares only once pressed afresh.
         marqueeConstrainArmed = !event.modifierFlags.contains(.shift)
         marqueeDragPixel = nil
+        marqueeMoveStart = nil
         let pixel = session.viewport.documentPoint(from: point, documentSize: document.size)
         guard let draft = session.lassoDraft, draft.kind == .polygonal else {
             // Cmd-drag inside the selection cuts and moves its pixels (Photoshop's temporary Move tool).
@@ -2531,7 +2573,7 @@ final class CanvasView: NSView {
 
     /// Marching ants animate only while a visible selection exists.
     private func updateAntsTimer() {
-        let active = session.selection?.isEmpty == false && window != nil
+        let active = session.selection?.isEmpty == false && session.showsSelectionEdges && window != nil
         if active, antsTimer == nil {
             let timer = Timer(timeInterval: 0.12, repeats: true) { [weak self] _ in
                 // A redraw still pending skips this tick: a slow outline stutters rather than queuing redraws forever.
@@ -2767,34 +2809,34 @@ extension CanvasView {
         return true
     }
 
-    /// Makes `id`'s picture as Copy Merged would — the document with everything above the layer hidden, composited by the
-    /// export's code — once the canvas has settled on `key`, then redraws to show it.
-    private func makeLensExact(_ id: UUID, key: [String]) {
-        guard lensWaiting[id] != key else { return }
-        lensWaiting[id] = key
+    /// Makes `id`'s picture once the canvas has settled on `key`: what's under it composited as Copy Merged would, on
+    /// the main thread, then the adjustment worked on it off it (the slow part), then a redraw to show it.
+    private func makeExact(_ id: UUID, key: [String], adjustment: LayerAdjustment) {
+        guard exactWaiting[id] != key else { return }
+        exactWaiting[id] = key
         // On the run loop, so it waits while a drag or a slider keeps the canvas busy.
         Timer.scheduledTimer(withTimeInterval: 0.15, repeats: false) { [weak self] _ in MainActor.assumeIsolated {
-            guard let self, self.lensWaiting[id] == key else { return }
-            self.lensWaiting[id] = nil
-            // Only if the canvas still shows what this was asked for.
-            guard self.lensLatest[id] == key, var document = self.session.document,
+            guard let self, self.exactWaiting[id] == key else { return }
+            self.exactWaiting[id] = nil
+            guard self.exactLatest[id] == key, var document = self.session.document,
                   document.layers.contains(where: { $0.id == id }) else { return }
-            let underneath = Set(document.renderLayers.map(\.id).prefix { $0 != id }).union([id])
+            let underneath = Set(document.renderLayers.map(\.id).prefix { $0 != id })
             for index in document.layers.indices where document.layers[index].isGroup != true && !underneath.contains(document.layers[index].id) {
                 document.layers[index].isVisible = false
-            }
-            // Its own mask and opacity go on over it on the canvas.
-            if let index = document.layers.firstIndex(where: { $0.id == id }) {
-                document.layers[index].mask?.isEnabled = false
-                document.layers[index].opacity = 1
             }
             let width = Int(document.size.width.rounded()), height = Int(document.size.height.rounded())
             guard let context = try? BrushRaster.context(width: width, height: height, mask: false) else { return }
             self.session.drawLiveComposite(document, in: context)
-            guard let image = context.makeImage() else { return }
-            self.lensExact = self.lensExact.filter { self.lensLatest[$0.key] != nil }
-            self.lensExact[id] = (key, image)
-            self.needsDisplay = true
+            guard let below = context.makeImage() else { return }
+            Task.detached(priority: .userInitiated) {
+                guard let image = try? adjustment.apply(below, document: document.size) else { return }
+                await MainActor.run {
+                    guard self.exactLatest[id] == key else { return }
+                    self.exactAdjustments = self.exactAdjustments.filter { self.exactLatest[$0.key] != nil }
+                    self.exactAdjustments[id] = (key, image)
+                    self.needsDisplay = true
+                }
+            }
         } }
     }
 
@@ -3245,21 +3287,23 @@ extension CanvasView {
         }
         // An adjustment re-colors what's under it, through its own mask and its folders' masks, at its opacity.
         func adjusted(_ below: CIImage, by layer: ImageLayer, adjustment: LayerAdjustment, folders: Bool) -> CIImage? {
-            if folders, adjustment.kind == .lensEffects, let exact = lensExact[layer.id], exact.key == lensLatest[layer.id],
+            var changed: CIImage
+            if folders, Self.keptExactly.contains(adjustment.kind), let exact = exactAdjustments[layer.id], exact.key == exactLatest[layer.id],
                let placed = placement.place(exact.image, transform: LayerTransform(origin: .zero, size: document.size)) {
-                // Worked out with its folders, blend mode and the layers under it, without its own mask and opacity.
-                return covered(placed, over: below, by: layer, folders: false, opacity: layer.opacity)
+                changed = placed
+            } else {
+                // Lens Effects works on what's below as pixels, as the export does: the canvas places layers with nearest
+                // sampling, which its spikes' rotations would carry through, keeping hard bright pixels the export smooths.
+                var source = below
+                if adjustment.kind == .lensEffects {
+                    let page = CGRect(origin: .zero, size: document.size).applying(placement.mapping)
+                    source = placement.renderer.keep(below.cropped(to: page)) ?? below
+                }
+                guard let live = GPUAdjustment.apply(adjustment, to: source, scale: placement.scale, mapping: placement.mapping,
+                                                     hdr: hasHDR, document: session.document?.size)
+                else { return nil }
+                changed = live
             }
-            // Lens Effects works on what's below as pixels, as the export does: the canvas places layers with nearest sampling,
-            // which its spikes' rotations would carry through, keeping hard bright pixels the export smooths.
-            var source = below
-            if adjustment.kind == .lensEffects {
-                let page = CGRect(origin: .zero, size: document.size).applying(placement.mapping)
-                source = placement.renderer.keep(below.cropped(to: page)) ?? below
-            }
-            guard var changed = GPUAdjustment.apply(adjustment, to: source, scale: placement.scale, mapping: placement.mapping,
-                                                    hdr: hasHDR, document: session.document?.size)
-            else { return nil }
             // In a blend mode, the adjusted colors blend with the ones under them at full coverage, and the original
             // coverage comes back after — as LiveMaskRenderer does, so soft edges aren't thickened.
             let mode = session.displayedBlendMode(for: layer)
@@ -3353,16 +3397,19 @@ extension CanvasView {
                 // Its folders' masks are part of what it's drawn through.
                 var folder = layer.parentID, depth = 0
                 while let current = folder, depth < 64 { _ = folderMask(current); folder = byID[current]?.parentID; depth += 1 }
-                if adjustment.kind == .lensEffects {
-                    // The exact effect doesn't hang on the layer's own mask or opacity, which go on over it as they're
-                    // painted and dragged, so neither leaves the exact one.
-                    let key = prints + ["lens \(id) \(adjustment) \(layer.transform) \(layer.effectiveOpacity(in: byID) / max(layer.opacity, 1e-6)) "
-                                        + "\(session.displayedBlendMode(for: layer))"]
-                    lensLatest[id] = key
-                    if !key.contains(where: { $0.hasPrefix("transient") }), lensExact[id]?.key != key { makeLensExact(id, key: key) }
+                if Self.keptExactly.contains(adjustment.kind), !hasHDR {
+                    // What's under it and its settings, not the frame: panning and zooming keep the picture made. Its own
+                    // mask, opacity and blend mode go on over it as they're painted and dragged, so none of them leaves it.
+                    let key = prints.filter { !$0.hasPrefix("frame ") } + ["exact \(id) \(adjustment) \(document.size)"]
+                    exactLatest[id] = key
+                    if !key.contains(where: { $0.hasPrefix("transient") }), exactAdjustments[id]?.key != key {
+                        makeExact(id, key: key, adjustment: adjustment)
+                    }
                 }
                 prints.append(adjustmentPrint(layer, adjustment))
-                if adjustment.kind == .lensEffects { prints.append(lensExact[id]?.key == lensLatest[id] ? "exact" : "quick") }
+                if Self.keptExactly.contains(adjustment.kind) {
+                    prints.append(exactAdjustments[id]?.key == exactLatest[id] ? "exact" : "live")
+                }
                 let steady = !prints.contains { $0.hasPrefix("transient") }
                 if cachesAdjustments, steady, let entry = adjustmentCache[id], entry.key == prints {
                     result = entry.image

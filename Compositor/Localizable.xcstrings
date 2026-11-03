@@ -1541,6 +1541,17 @@
         }
       }
     },
+    "Choose the light's color": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择这盏灯的颜色"
+          }
+        }
+      }
+    },
     "Choose the lines' color": {
       "extractionState": "manual",
       "localizations": {
@@ -1761,6 +1772,17 @@
         }
       }
     },
+    "Click or drag on the canvas to move the light": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在画布上点击或拖动可移动灯光"
+          }
+        }
+      }
+    },
     "Click or drag to move the view": {
       "extractionState": "manual",
       "localizations": {
@@ -1959,6 +1981,17 @@
         }
       }
     },
+    "Close the filter and add the depth the haze goes by as a new layer: white is near, black is far": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关闭滤镜，把雾气所依据的深度加成新图层：白色近，黑色远"
+          }
+        }
+      }
+    },
     "Close the search": {
       "extractionState": "manual",
       "localizations": {
@@ -2032,6 +2065,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "颜色减淡"
+          }
+        }
+      }
+    },
+    "Color Noise": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "彩色噪点"
           }
         }
       }
@@ -2307,6 +2351,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "控制锐化的强度。"
+          }
+        }
+      }
+    },
+    "Convert to 16-Bit": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "转换为 16 位"
+          }
+        }
+      }
+    },
+    "Convert to 8-Bit": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "转换为 8 位"
           }
         }
       }
@@ -2956,6 +3022,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "深度"
+          }
+        }
+      }
+    },
+    "Depth Contrast": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "深度对比"
           }
         }
       }
@@ -4027,6 +4104,17 @@
         }
       }
     },
+    "Extract Depth": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "提取深度"
+          }
+        }
+      }
+    },
     "Eyedropper": {
       "extractionState": "manual",
       "localizations": {
@@ -4544,6 +4632,17 @@
         }
       }
     },
+    "Getting depth…": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在获取深度…"
+          }
+        }
+      }
+    },
     "Global": {
       "extractionState": "manual",
       "localizations": {
@@ -4874,6 +4973,17 @@
         }
       }
     },
+    "Haze": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雾气"
+          }
+        }
+      }
+    },
     "Height": {
       "extractionState": "manual",
       "localizations": {
@@ -4963,6 +5073,17 @@
       }
     },
     "Hide Layer": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "隐藏图层"
+          }
+        }
+      }
+    },
+    "Hide Layers": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -5116,6 +5237,17 @@
         }
       }
     },
+    "How big the light is": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "灯光有多大"
+          }
+        }
+      }
+    },
     "How bright a light has to be to flare; near 100, only the biggest, brightest spots": {
       "extractionState": "manual",
       "localizations": {
@@ -5134,6 +5266,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "光线要多亮才会闪出星芒；接近 100 时只有最亮最大的光斑会发光"
+          }
+        }
+      }
+    },
+    "How bright the beams are": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "光束有多亮"
           }
         }
       }
@@ -5215,6 +5358,17 @@
         }
       }
     },
+    "How far from the light the beams reach": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "光束从灯光延伸多远"
+          }
+        }
+      }
+    },
     "How far in brightness the adjustment reaches.": {
       "extractionState": "manual",
       "localizations": {
@@ -5244,6 +5398,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "该调整在饱和度上的影响范围。"
+          }
+        }
+      }
+    },
+    "How far into the scene the haze begins: low reaches up to the camera, high leaves all but the farthest parts clear": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雾气从场景多深的地方开始：低值一直漫到镜头，高值则只留最远处清晰"
           }
         }
       }
@@ -5391,6 +5556,39 @@
         }
       }
     },
+    "How much colored speckle is smoothed into the colors around it": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "彩色斑点被抹进周围颜色的程度"
+          }
+        }
+      }
+    },
+    "How much fine texture and edges are kept while the grain is smoothed": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "平滑噪点时保留多少细节纹理和边缘"
+          }
+        }
+      }
+    },
+    "How much grain is smoothed from the picture's brightness": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按画面亮度平滑掉多少噪点"
+          }
+        }
+      }
+    },
     "How much light scatters: a soft halo around bright areas, and gently lifted shadows": {
       "extractionState": "manual",
       "localizations": {
@@ -5446,6 +5644,17 @@
         }
       }
     },
+    "How much the beams break up into separate shafts": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "光束散成独立光柱的程度"
+          }
+        }
+      }
+    },
     "How strongly edges and fine detail are brought out": {
       "extractionState": "manual",
       "localizations": {
@@ -5475,6 +5684,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "线的端点，以及每个虚线和点如何收尾"
+          }
+        }
+      }
+    },
+    "How thick the air is: haze lit by the light, thinner in front of the subject": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "空气有多浑：雾气被灯光照亮，主体前方较薄"
           }
         }
       }
@@ -5897,6 +6117,17 @@
         }
       }
     },
+    "Intensity": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "强度"
+          }
+        }
+      }
+    },
     "Inverse": {
       "extractionState": "manual",
       "localizations": {
@@ -5952,6 +6183,17 @@
         }
       }
     },
+    "Keep Subject Clear": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保持主体清晰"
+          }
+        }
+      }
+    },
     "Keep the 16-bit layers' full precision, in a file about twice the size": {
       "extractionState": "manual",
       "localizations": {
@@ -5970,6 +6212,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "开启时源点随画笔一起移动；关闭时每一笔都从源点开始"
+          }
+        }
+      }
+    },
+    "Keep the subject clear of the haze; off, it's hazed by its own distance, so a figure far off is misted": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "让主体不被雾气笼罩；关闭后主体按自身距离受雾影响，远处的人影会蒙上雾"
           }
         }
       }
@@ -7580,6 +7833,17 @@
         }
       }
     },
+    "New filter layer": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新建滤镜图层"
+          }
+        }
+      }
+    },
     "New folder": {
       "extractionState": "manual",
       "localizations": {
@@ -8621,6 +8885,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "正值让识别到的蒙版向内收缩，负值让其向外扩张"
+          }
+        }
+      }
+    },
+    "Preserve Details": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保留细节"
           }
         }
       }
@@ -10088,6 +10363,17 @@
         }
       }
     },
+    "Selection %@ × %@ px": {
+      "extractionState": "extracted",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选区 %@ × %@ 像素"
+          }
+        }
+      }
+    },
     "Sets how far the glow reaches. Has no effect until Glow is raised.": {
       "extractionState": "manual",
       "localizations": {
@@ -10150,6 +10436,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "阴影"
+          }
+        }
+      }
+    },
+    "Shafts": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "光柱"
           }
         }
       }
@@ -10352,6 +10649,17 @@
         }
       }
     },
+    "Show Extras": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示辅助元素"
+          }
+        }
+      }
+    },
     "Show Grid": {
       "extractionState": "manual",
       "localizations": {
@@ -10375,6 +10683,17 @@
       }
     },
     "Show Layer": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示图层"
+          }
+        }
+      }
+    },
+    "Show Layers": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -10788,6 +11107,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "扩散"
+          }
+        }
+      }
+    },
+    "Spread out depths bunched together, such as a distant city, so the haze builds through them in steps; 0 keeps the depth as the model sees it": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "把聚在一起的深度拉开（比如远处的城市），让雾气逐层穿过；0 表示保持模型看到的深度"
           }
         }
       }

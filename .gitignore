@@ -33,3 +33,7 @@ BUILD_PLAN.md
 # 测试覆盖率产物
 *.profraw
 default.profdata
+
+# Local depth-model plan, and the results it brings back (models, depth maps, reports)
+/DEPTH_MODEL_PLAN.md
+/depth-model-results/

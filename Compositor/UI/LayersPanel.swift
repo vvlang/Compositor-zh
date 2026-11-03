@@ -3,10 +3,10 @@ import SwiftUI
 struct LayersPanel: View {
     @Bindable var session: EditorSession
     /// Dragging the panel's left edge sets it, within `widths`.
-    var width: CGFloat = 252
+    var width: CGFloat = 261
     /// No narrower than the footer: its icons can't shrink, and a footer wider than the panel pushed everything in
     /// it out past both edges, over the edge that resizes it.
-    static let widths: ClosedRange<Double> = 222...352
+    static let widths: ClosedRange<Double> = 261...372
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -28,62 +28,21 @@ struct LayersPanel: View {
                 }
             } else {
                 LayersUnavailableView("No layers yet", systemImage: "square.3.layers.3d") {
+                    // 三元表达式在 Swift 里只能是 String，拿不到 LocalizedStringKey，
+                    // 所以这里用 L10n.text 显式取词。上游写的是裸 Text(三元)，
+                    // 那句永远不会被查表。
                     L10n.text(session.document == nil ? "Create a canvas or import a file." : "Import a file or add a blank layer.")
                         .font(.caption).multilineTextAlignment(.center)
                 }
             }
             Divider()
-            // No spacing: each button's hit area supplies it (8 pt either side makes the 16 pt gap).
-            HStack(spacing: 0) {
-                Button { session.addBlankLayer() } label: { FooterIcon(systemName: "plus.square") }
-                    .help("New blank layer (⇧⌘N)").accessibilityLabel("New blank layer")
-                    .accessibilityIdentifier("addBlankLayer").disabled(!session.layersLookEditable)
-                Button { session.groupSelectedLayers() } label: { FooterIcon(systemName: "folder.badge.plus") }
-                    .help("Group selected layers (⌘G)").accessibilityLabel("New folder").disabled(!session.layersLookEditable)
-                LayerMaskMenu(session: session)
-                Menu {
-                    // The Image menu's adjustments, then the Filter menu's filters.
-                    ForEach(AdjustmentKind.imageAdjustments, id: \.self) { kind in
-                        Button { session.addAdjustment(kind) } label: { Text(verbatim: kind.localizedName) }
-                    }
-                    Divider()
-                    ForEach(AdjustmentKind.filters, id: \.self) { kind in
-                        Button { session.addAdjustment(kind) } label: { Text(verbatim: kind.localizedName) }
-                    }
-                } label: { Image(systemName: "circle.lefthalf.filled").footerHitArea() }
-                    .menuStyle(.borderlessButton).fixedSize().help("New adjustment layer").disabled(!session.layersLookEditable)
-                Menu {
-                    ForEach(LayerEffectKind.allCases, id: \.self) { kind in
-                        Button { session.addEffect(kind) } label: { Text(verbatim: kind.localizedName + "…") }
-                    }
-                } label: { Image(systemName: "sparkles").footerHitArea() }
-                    .menuStyle(.borderlessButton).fixedSize()
-                    .help("Add layer effect").accessibilityLabel("Layer effects")
-                    .accessibilityIdentifier("layerEffects").disabled(!session.layersLookEditable || session.activeLayer?.isGroup != false || session.activeLayer?.asset == nil)
-                Spacer()
-                Button { session.deleteLayerOrMask() } label: { FooterIcon(systemName: "trash") }
-                    .help(deleteTitle)
-                    .accessibilityLabel(deleteTitle)
-                    .accessibilityIdentifier("deleteLayer")
-                    .disabled(!session.layersLookEditable || session.activeLayer == nil)
-            }
-            .buttonStyle(.plain).foregroundStyle(.secondary)
-            .padding(.horizontal, 8).padding(.vertical, 4) // Plus the hit areas' 8 and 12: the original 16.
+            LayersFooter(session: session)
 
         }
         .frame(width: width)
         .task(id: session.adjustmentEditingID) {
             if let id = session.adjustmentEditingID { await session.beginAdjustmentEditing(id) }
         }
-    }
-
-    /// 底部垃圾桶针对什么，取决于当前选中的是效果、蒙版还是图层。拆成属性而不是
-    /// 留在原地，是因为四层三元没法整体进目录——中文语序和英文不同。
-    private var deleteTitle: String {
-        if session.selectedEffect != nil { return L10n.string("Delete selected effect") }
-        if session.isMaskSelected { return L10n.string("Delete layer mask") }
-        return session.selectedLayerIDs.count > 1
-            ? L10n.string("Delete selected layers") : L10n.string("Delete selected layer")
     }
 }
 
@@ -108,6 +67,150 @@ private struct LayersUnavailableView<Content: View>: View {
         }
         .foregroundStyle(.secondary).padding(16)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+/// The buttons under the layers: new layer, folder, mask, adjustment and filter layers, effects, and delete.
+struct LayersFooter: View {
+    let session: EditorSession
+
+    var body: some View {
+        // No spacing: each button's hit area supplies it (8 pt either side makes the 16 pt gap).
+        HStack(spacing: 0) {
+            Button { session.addBlankLayer() } label: { FooterIcon(systemName: "plus.square") }
+                .help("New blank layer (⇧⌘N)").accessibilityLabel("New blank layer")
+                .accessibilityIdentifier("addBlankLayer").disabled(!session.layersLookEditable)
+            Button { session.groupSelectedLayers() } label: { FooterIcon(systemName: "folder.badge.plus") }
+                .help("Group selected layers (⌘G)").accessibilityLabel("New folder").disabled(!session.layersLookEditable)
+            LayerMaskMenu(session: session)
+            // Two menus, as the menu bar has: the Image menu's adjustments, then the Filter menu's filters.
+            FooterMenu(systemName: "circle.lefthalf.filled", items: AdjustmentKind.imageAdjustments.map { kind in
+                (kind.localizedName, { session.addAdjustment(kind) })
+            })
+                .help("New adjustment layer").accessibilityLabel("New adjustment layer")
+                .disabled(!session.layersLookEditable)
+            FooterMenu(items: AdjustmentKind.filters.map { kind in
+                (kind.localizedName, { session.addAdjustment(kind) })
+            }) { CheckerCircleIcon() }
+                .help("New filter layer").accessibilityLabel("New filter layer")
+                .disabled(!session.layersLookEditable)
+            FooterMenu(systemName: "sparkles", items: LayerEffectKind.allCases.map { kind in
+                (kind.localizedName + "…", { session.addEffect(kind) })
+            })
+                .help("Add layer effect").accessibilityLabel("Layer effects")
+                .accessibilityIdentifier("layerEffects").disabled(!session.layersLookEditable || session.activeLayer?.isGroup != false || session.activeLayer?.asset == nil)
+            Spacer()
+            Button { session.deleteLayerOrMask() } label: { FooterIcon(systemName: "trash") }
+                .help(deleteTitle)
+                .accessibilityLabel(deleteTitle)
+                .accessibilityIdentifier("deleteLayer")
+                .disabled(!session.layersLookEditable || session.activeLayer == nil)
+        }
+        .buttonStyle(.plain).foregroundStyle(.secondary)
+        .padding(.horizontal, 8).padding(.vertical, 4) // Plus the hit areas' 8 and 12: the original 16.
+    }
+
+    /// 底部垃圾桶针对什么，取决于当前选中的是效果、蒙版还是图层。拆成属性而不是
+    /// 留在原地，是因为四层三元没法整体进目录——中文语序和英文不同。
+    private var deleteTitle: String {
+        if session.selectedEffect != nil { return L10n.string("Delete selected effect") }
+        if session.isMaskSelected { return L10n.string("Delete layer mask") }
+        return session.selectedLayerIDs.count > 1
+            ? L10n.string("Delete selected layers") : L10n.string("Delete selected layer")
+    }
+}
+
+/// A footer button that opens a menu, with the plain buttons' whole hit area: a SwiftUI Menu's pop-up button is only as
+/// tall as its icon, however much room its label is given. Its arrow is the pop-up's.
+struct FooterMenu<Icon: View>: View {
+    let items: [(title: String, action: @MainActor () -> Void)]
+    @ViewBuilder let icon: () -> Icon
+    @State private var anchor = FooterMenuAnchor()
+    @Environment(\.isEnabled) private var isEnabled
+
+    var body: some View {
+        Button { anchor.show(items) } label: {
+            HStack(spacing: 3) {
+                icon()
+                Image(systemName: "chevron.down").font(.system(size: 7, weight: .bold))
+            }
+            .foregroundStyle(isEnabled ? AnyShapeStyle(.primary) : AnyShapeStyle(Color.white.opacity(0.5)))
+            .background(FooterMenuAnchorView(anchor: anchor))
+            // As wide as a pop-up button's, its arrow taking the room the plain buttons give to padding; as tall as theirs.
+            .padding(.horizontal, 4).padding(.vertical, 12)
+            .contentShape(Rectangle())
+        }
+    }
+}
+
+extension FooterMenu where Icon == Image {
+    init(systemName: String, items: [(title: String, action: @MainActor () -> Void)]) {
+        self.init(items: items) { Image(systemName: systemName) }
+    }
+}
+
+/// The filter layers' button: a ring with a checkered disc inside, beside the adjustments' half-filled circle. The
+/// ring is the system's own circle, so it matches that icon's size and weight.
+struct CheckerCircleIcon: View {
+    var body: some View {
+        Image(systemName: "circle").overlay {
+            Canvas { context, size in
+                // The disc a little inside the ring, four squares across it.
+                let side = min(size.width, size.height) * 0.62
+                let disc = CGRect(x: (size.width - side) / 2, y: (size.height - side) / 2, width: side, height: side)
+                context.clip(to: Path(ellipseIn: disc))
+                let square = side / 4
+                for row in 0..<4 {
+                    for column in 0..<4 where (row + column) % 2 == 0 {
+                        context.fill(Path(CGRect(x: disc.minX + CGFloat(column) * square, y: disc.minY + CGFloat(row) * square,
+                                                 width: square, height: square)), with: .foreground)
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// Where a `FooterMenu`'s menu opens: just above its icon, which sits at the bottom of the window.
+@MainActor final class FooterMenuAnchor {
+    weak var view: NSView?
+
+    func show(_ items: [(title: String, action: @MainActor () -> Void)]) {
+        guard let view else { return }
+        let menu = NSMenu()
+        for item in items { menu.addItem(FooterMenuItem(title: item.title, action: item.action)) }
+        // The menu's top-left corner goes at the point given, so its own height plus a gap above the icon's top.
+        let top = menu.size.height + 6
+        menu.popUp(positioning: nil, at: NSPoint(x: 0, y: view.isFlipped ? -top : view.bounds.maxY + top), in: view)
+    }
+}
+
+private final class FooterMenuItem: NSMenuItem {
+    private let run: @MainActor () -> Void
+
+    init(title: String, action: @escaping @MainActor () -> Void) {
+        run = action
+        super.init(title: title, action: #selector(choose), keyEquivalent: "")
+        target = self
+    }
+
+    required init(coder: NSCoder) { fatalError("Not used") }
+
+    @objc private func choose() { MainActor.assumeIsolated { run() } }
+}
+
+private struct FooterMenuAnchorView: NSViewRepresentable {
+    let anchor: FooterMenuAnchor
+    func makeNSView(context: Context) -> NSView {
+        let view = Passthrough()
+        anchor.view = view
+        return view
+    }
+    func updateNSView(_ view: NSView, context: Context) { anchor.view = view }
+
+    /// Only a place to open from: clicks go on to the button.
+    private final class Passthrough: NSView {
+        override func hitTest(_ point: NSPoint) -> NSView? { nil }
     }
 }
 

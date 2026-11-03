@@ -56,6 +56,22 @@ struct LayerTests {
         #expect(session.activeLayer?.isVisible == true)
     }
 
+    @Test func hideAndShowApplyToEverySelectedLayer() throws {
+        let session = sessionWithThreeLayers()
+        let layers = try #require(session.document?.layers)
+        session.selectLayers([layers[0].id, layers[2].id], primary: layers[2].id)
+        #expect(session.visibilityTitle == L10n.string("Hide Layers"))
+        session.toggleSelectedLayersVisibility()
+        #expect(session.document?.layers.map(\.isVisible) == [false, true, false], "both selected hide; the other stays")
+        #expect(session.visibilityTitle == L10n.string("Show Layers"))
+        // With the active one hidden, all are shown, even one shown already.
+        session.toggleLayerVisibility(layers[0].id)
+        session.toggleSelectedLayersVisibility()
+        #expect(session.document?.layers.map(\.isVisible) == [true, true, true])
+        session.undo()
+        #expect(session.document?.layers.map(\.isVisible) == [true, true, false], "one undo step")
+    }
+
     @Test func reorderTranslatesVisibleOrderAndKeepsSelection() throws {
         let session = sessionWithThreeLayers()
         let active = session.activeLayerID
