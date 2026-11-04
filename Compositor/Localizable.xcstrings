@@ -3158,6 +3158,17 @@
         }
       }
     },
+    "Distances": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "距离"
+          }
+        }
+      }
+    },
     "Distort Layer Mask": {
       "extractionState": "manual",
       "localizations": {
@@ -6630,6 +6641,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "直线"
+          }
+        }
+      }
+    },
+    "Line %@": {
+      "extractionState": "extracted",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "直线 %@"
           }
         }
       }
@@ -10458,6 +10480,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "形状"
+          }
+        }
+      }
+    },
+    "Shape %@": {
+      "extractionState": "extracted",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "形状 %@"
           }
         }
       }

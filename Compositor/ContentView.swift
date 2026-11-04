@@ -405,7 +405,14 @@ struct ContentView: View {
                 Text(session.viewport.zoom, format: .percent.precision(.fractionLength(0...1)))
                     .frame(width: 62, alignment: .leading).accessibilityIdentifier("zoomStatus")
                 Text("\(document.width) × \(document.height) px").accessibilityIdentifier("canvasDimensions")
-                if let size = session.selectionSize {
+                if let draft = session.shapeDraft, let size = session.dragOutSize {
+                    // 每个分支各用字面量：写成三元的话，键会折叠成 "%@ %@"，
+                    // 两个分支就分不出来了。尺寸本身是数字和单位，不译。
+                    Text(verbatim: draft.kind == .line
+                          ? L10n.string("Line \(size.text)")
+                          : L10n.string("Shape \(size.text)"))
+                        .accessibilityIdentifier("shapeDimensions")
+                } else if let size = session.selectionSize {
                     Text("Selection \(size.width) × \(size.height) px").accessibilityIdentifier("selectionDimensions")
                 }
                 Text("sRGB · Transparent")
