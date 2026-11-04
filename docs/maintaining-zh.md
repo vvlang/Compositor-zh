@@ -96,12 +96,22 @@ Sparkle.xcframework 里的符号链接，构建会报 `could not determine execu
 
 ### 关于 Sparkle
 
-`Config/Info.plist` 的 `SUFeedURL` 指向**上游**，`scripts/publish.sh` 的 `REPO`
-也是上游。这是**有意为之**：中文版用户想跟进上游最新功能时，Sparkle 会把他们
-带去装英文上游版，正是他们需要的。
+`Config/Info.plist` 的 `SUFeedURL` 指向**本仓库**：
+`https://raw.githubusercontent.com/vvlang/Compositor-zh/main/appcast.xml`。
+`SUPublicEDKey` 是我们自己生成的 EdDSA 公钥，私钥只在本机钥匙串
+（服务名 `https://sparkle-project.org`）和 GitHub Secret `SPARKLE_PRIVATE_KEY` 里。
 
-代价是中文版自己做不了 Sparkle 自动更新——`SUPublicEDKey` 是上游的 EdDSA 公钥，
-私钥在他手里，而且你的构建是 ad-hoc 签名，Sparkle 本来也不接受。
+`scripts/publish-sparkle.sh` 在 CI 里负责签名并写回 `appcast.xml`；私钥经标准输入
+送给 `sign_update`，不落盘。**没有这个 Secret 时那一步会跳过**：DMG 照发，但没有
+appcast，Sparkle 不会提示更新。
+
+**版本号两边必须一致。** appcast 的 `sparkle:version` 用的是 `CFBundleVersion`，
+不是 `MARKETING_VERSION`。只改一边会出问题：appcast 说 49、DMG 里还是 48，
+用户装完立刻又被提示同一版，死循环。所以 `CURRENT_PROJECT_VERSION` 和 appcast
+要一起动。
+
+上游的 `scripts/publish.sh` 仍然指向上游（`REPO=robbietilton/Compositor`）——
+那是上游自己的文件，本 fork 不用它。
 
 **推上游在结构上不可能**：`upstream` 的 push URL 是 `DISABLED://never-push-to-upstream`。
 
@@ -262,10 +272,11 @@ dc2ddca  catch the strings the first pass missed
 
 ### 注释汉化
 
-`EditorSession.swift`（98 条）和 `EditorCanvas.swift`（326 条）的中文注释在
-1.4.10 那次同步时随上游重写回到了英文。它们恰好是和上游冲突最狠的两个文件
-（`EditorCanvas.swift` 一个就改了 677 行），而注释在运行时不产生任何作用——
-等于让每次同步的冲突面翻倍。
+`EditorSession.swift` 和 `EditorCanvas.swift` 曾经有完整的中文注释，在 1.4.10 那次
+同步时随上游重写回到了英文（现在这两个文件里的中文注释只剩零星几条）。
+
+它们恰好是和上游冲突最狠的两个文件（`EditorCanvas.swift` 一次就改了 677 行），
+而注释在运行时不产生任何作用——等于让每次同步的冲突面翻倍。
 
 要恢复的话另开一轮，别在上游还在改这些文件的时候追着改。
 
@@ -308,6 +319,38 @@ dc2ddca  catch the strings the first pass missed
   `filterLayer.applied(to: FilterSettings())` 算，漏了 `beginAdjustmentEditing` 里补上的
   模糊/运动/噪点兜底值（`gaussianRadius` 的兜底是 10，而 `FilterSettings.radius` 的
   默认值是 5）。按 1.5.7 的惯例改断言（照实现同样的构造方式），**不改上游实现**。
+- **2026-11-04（1.6.3）**：只有 appcast 一个冲突，代码零冲突。上游这轮加了
+  拖拽时的尺寸标签、图层到画布边缘的距离（`LayerDistances`），并把 `showsBusy`
+  从存储属性改成了计算属性——它每次读都要过一遍 `quickOperationsEnded`，好让
+  UI 在长操作开始/结束时重算。
+  上游新增的形状尺寸标签写的是 `Text("... (三元) ...(插值)")`：三元在 Swift 里
+  只能是 String，`Text` 拿到的是普通字符串，**根本不会查表**——上游自己那句是英文。
+  改成两个分支各用字面量（`"Line \(size.text)"` / `"Shape \(size.text)"`），
+  键分别是 `Line %@` / `Shape %@`。这里要各写一个字面量：把三元放进
+  `L10n.string` 里的话，两个分支的键会折叠成同一个 `%@ %@`，就分不出来了。
+  顺带清掉一个失效键 `%@ %@`——它原先是从上游那行 `Text` 误提取出来的。
+
+  **这一轮 CI 的 unit job 撞了 60 分钟超时，两次都是。** 排查结论是**runner
+  偶发，不是代码缺陷**：
+
+  | 证据 | 结果 |
+  |---|---|
+  | 本地跑全部测试 | 893 单元 + 27 窗口，全过 |
+  | 本地用 CI 的方式跑（`scripts/ci-tests.sh`） | 71 秒跑完 477 个测试，全过 |
+  | 本地跑上游 1.6.3 的原始代码 | 72 秒，同样正常 |
+  | CI 日志 | 测试在 12:21 就 SUCCEEDED 了，是**脚本的后续分组**卡住 |
+  | 上游同期 | 11-03 晚上连续 5 次跑有 3 次被 cancelled |
+
+  顺带排除了两个想当然的假设：**不是查表慢**（实测 20000 次 `String(localized:)`
+  只要 15.8 ms，即每次 0.6 微秒），**也不是我们的汉化层拖累了**（`first` 分组
+  两边几乎一样：SelectionTests 41 秒对 35 秒）。
+
+  结论是这个 runner 环境的偶发，`Release` workflow 不受影响（DMG 已正常发布）。
+  按决定**不改 CI**——需要时手动重跑即可。
+
+  **教训**：CI 变红先看日志里「测试输出结束」和「job 结束」的时间戳差。差值很大
+  说明是脚本的某个分组卡住，不是测试慢。本地复现不了时，别急着改实现——
+  先把「同一份代码在别处跑过吗」查清楚。
 
 ---
 
@@ -320,6 +363,11 @@ dc2ddca  catch the strings the first pass missed
 | `CFBundleDisplayName` = 「Compositor 中文版」 | 在「应用程序」里区分于上游英文版 |
 | About 面板 + 译者署名 | 上游没有这个面板，SwiftUI 也不会自动补 |
 | `README.zh-CN.md` 及配套文档 | 中文版文档 |
+
+**待办**：`docs/project-format.zh-CN.md` 停在版本 1–18，代码已是 1–21。上游还在持续
+改这个文档，等它稳定一轮再整体重译比现在追着改划算。同理
+`docs/writing-comp-files.zh-CN.md` 也落后于英文版（PDF 转 PNG、新的调整类型那两段
+已同步过，但整体仍需通读一遍）。
 | `.github/workflows/release.yml` | 自动构建 ad-hoc DMG（上游那份需要 Developer ID 证书） |
 | `.github/workflows/verify.yml` 的 `localization` job | 本地化不报错，得单独守 |
 | `.github/workflows/upstream-watch.yml` | 每天检查上游更新 |

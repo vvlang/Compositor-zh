@@ -89,7 +89,7 @@ That cask installs the **upstream English build**, not the Chinese one.
 - Keep working while a project saves
 - Photoshop-style keyboard shortcuts throughout, remappable in Edit > Keyboard Shortcuts
 - Drag a number's label to scrub its value, as in Photoshop
-- Automatic updates, signed and notarized
+- Automatic updates (Sparkle). **This fork's build is not notarized**, so the first install still needs one manual allow — see the Chinese README
 
 ### Works with AI agents
 - AI agents and scripts can build and edit projects directly: a `.comp` is a folder of PNG layers and a manifest, and an open project updates live as it's written. See [Writing Compositor projects](docs/writing-comp-files.md)

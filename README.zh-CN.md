@@ -127,7 +127,7 @@ xattr -dr com.apple.provenance /Applications/Compositor.app
 - 保存过程中可继续操作
 - 全程采用 Photoshop 风格的快捷键，可在「编辑 > 键盘快捷键」中重新映射
 - 拖动数字标签可平滑调整数值，如同 Photoshop
-- 自动更新，已签名并公证
+- 自动更新：应用自己检查更新并提示（Sparkle）。**但本仓库的构建未经公证**，首次安装仍需手动放行一次
 
 ### 与 AI 代理协作
 - AI 代理和脚本可直接构建和编辑工程：`.comp` 文件本质上是一个包含 PNG 图层和清单的文件夹，已打开的工程在你写入文件时会实时更新。详见[编写 Compositor 工程](docs/writing-comp-files.zh-CN.md)
@@ -150,7 +150,7 @@ is confined to the display layer and the translation resources.
 ### Interface strings
 
 All interface strings live in a single file, **`Compositor/Localizable.xcstrings`** (an Xcode
-String Catalog), holding 926 zh-Hans translations. The source keeps the English originals and
+String Catalog), holding 1171 zh-Hans translations. The source keeps the English originals and
 looks them up through one entry point in `L10n.swift`:
 
 ```swift
