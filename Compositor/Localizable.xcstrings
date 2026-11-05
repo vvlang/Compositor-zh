@@ -2817,28 +2817,6 @@
         }
       }
     },
-    "Default colors": {
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "默认颜色"
-          }
-        }
-      }
-    },
-    "Default colors (D)": {
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "默认颜色 (D)"
-          }
-        }
-      }
-    },
     "Defringe": {
       "extractionState": "manual",
       "localizations": {
@@ -4144,17 +4122,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "吸管 (I)"
-          }
-        }
-      }
-    },
-    "Fade the edge of the selection by this many pixels": {
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "按所填像素数羽化选区边缘"
           }
         }
       }
@@ -5541,6 +5508,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "每帧显示多久"
+          }
+        }
+      }
+    },
+    "How many pixels to expand, contract or feather the selection by": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "展开、收缩或羽化选区时移动多少像素"
           }
         }
       }
@@ -9769,6 +9747,28 @@
         }
       }
     },
+    "Reset colors": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重置颜色"
+          }
+        }
+      }
+    },
+    "Reset colors to black and white (D)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重置为黑白 (D)"
+          }
+        }
+      }
+    },
     "Reset curve": {
       "extractionState": "manual",
       "localizations": {
@@ -10381,17 +10381,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "选择这个取样颜色。"
-          }
-        }
-      }
-    },
-    "Selection %@ × %@ px": {
-      "extractionState": "extracted",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "选区 %@ × %@ 像素"
           }
         }
       }
