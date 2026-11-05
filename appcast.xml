@@ -4,12 +4,12 @@
     <title>Compositor 中文版</title>
     <item>
       <title>Version 1.6.4</title>
-      <pubDate>Thu, 05 Nov 2026 01:53:41 +0000</pubDate>
+      <pubDate>Thu, 05 Nov 2026 02:53:23 +0000</pubDate>
       <sparkle:version>63</sparkle:version>
       <sparkle:shortVersionString>1.6.4</sparkle:shortVersionString>
       <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
       <link>https://github.com/vvlang/Compositor-zh/releases/tag/v1.6.4</link>
-      <enclosure url="https://github.com/vvlang/Compositor-zh/releases/download/v1.6.4/Compositor-1.6.4.dmg" sparkle:edSignature="76yeq1Uju1AIAzN0E/AAUj/QVZ1s1U+IbdRFS+RYwzF+zLeyrIy5eUgpXKRdgAoW51GH5GdCQytsi4wO5wRUDA==" length="11977970" type="application/octet-stream"/>
+      <enclosure url="https://github.com/vvlang/Compositor-zh/releases/download/v1.6.4/Compositor-1.6.4.dmg" sparkle:edSignature="X+kR7WblkDKGQx6D+l820ku7XzXF+0JRODdnNhfNspowU5HnJaM+XeH+I9Am/k5td47SOm3cwwIJvlie+aM+Dg==" length="11630085" type="application/octet-stream"/>
     </item>
   </channel>
 </rss>
