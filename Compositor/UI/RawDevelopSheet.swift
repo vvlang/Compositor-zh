@@ -99,7 +99,7 @@ struct RawDevelopSheet: View {
             // 参数是 String.LocalizationValue，必须显式求值——SwiftUI 的 Text
             // 接不了它。上游把宽度从 90 调到 110，这里跟着。
             Text(verbatim: String(localized: title)).frame(width: 110, alignment: .leading)
-            Slider(value: value, in: range).frame(width: 300)
+            AppSlider(value: value, in: range).frame(width: 300)
             Text(String(format: "%.\(precision)f%@", value.wrappedValue, unit))
                 .monospacedDigit().foregroundStyle(.secondary)
                 .frame(width: 80, alignment: .trailing)

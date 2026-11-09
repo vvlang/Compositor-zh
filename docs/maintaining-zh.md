@@ -382,6 +382,10 @@ dc2ddca  catch the strings the first pass missed
   而那些 cancelled 其实是被后续推送打断的（上游从未卡死过：成功的 run 是
   7–14 分钟，取消的那些都在 5–16 分钟之间结束，看打断时机），并不是 runner 慢。
 
+- **2026-11-08（1.6.6）**：同步上游 1.6.5 与 1.6.6（共 13 个提交）。代码冲突仅 `RawDevelopSheet.swift`（上游把 Slider 换为自定义 AppSlider，本 fork 保持了 L10n 求值），`appcast.xml` 取本仓库。
+  上游这轮重构了全应用滑块（引入 `AppSlider` 替代系统 Slider，支持吸附与 Liquid Glass 质感），改版了拾色器（更精简的面板与色相条设计，新增「当前颜色」与原色还原提示），并在打开图像作为文档时保持名称与导出路径、优化 ⌥⇧⌘S / ⌥⇧⌘W「导出为」快捷键。
+  新增文案 2 条（「当前颜色」及拾色器原色恢复提示）。
+
 ---
 
 ## 这个 fork 改过上游什么

@@ -2553,6 +2553,17 @@
         }
       }
     },
+    "Current color": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前颜色"
+          }
+        }
+      }
+    },
     "Current: %@ × %@ pixels": {
       "extractionState": "extracted",
       "localizations": {
@@ -11591,6 +11602,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "用于绘制的字符，顺序任意：每个位置会选用与其色调最匹配的那个字符"
+          }
+        }
+      }
+    },
+    "The color before: click to go back to it": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "原先的颜色：点击还原"
           }
         }
       }

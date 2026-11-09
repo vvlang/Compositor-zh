@@ -123,7 +123,7 @@ xattr -dr com.apple.provenance /Applications/Compositor.app
 - 缩小视图时使用高质量下采样，放大时显示像素网格
 - 导入 JPEG、PNG、HEIC、TIFF、SVG、相机 RAW（需先经过 Raw Develop 处理）、Photoshop PSD 和 PSB（8 位 RGB，不支持 CMYK）。Photoshop 的文件夹、蒙版、混合模式、矩形/椭圆填充图形，以及简单的水平文字保持可编辑；其他矢量与垂直文字会转为像素。导入前会显示转换报告
 - 大文档处理：内存预算会随 Mac 配置自动调整，过大的 Photoshop 文件打开时会将各图层裁剪到画布范围
-- JPEG 导出带实时预览（⇧⌥⌘S）；拷贝合并
+- 导出 PNG（⇧⌘E）与导出为（⇧⌥⌘S，亦可按 ⇧⌥⌘W）支持 PNG、JPEG、按打印尺寸的一页 PDF，若包含 GIF 图层则支持带缩放与实时预览的动态 GIF、JPEG 质量与文件大小设置；导出为中的通道打包可将各图层打包为游戏纹理的 PNG 红、绿、蓝与 Alpha 通道，而色散（RGB Split）的「拆分到图层」可将图层恢复为这四个通道；在图层面板中右键点击图层可将各个图层单独导出为其像素裁切后的 PNG；拷贝合并
 - 保存过程中可继续操作
 - 全程采用 Photoshop 风格的快捷键，可在「编辑 > 键盘快捷键」中重新映射
 - 拖动数字标签可平滑调整数值，如同 Photoshop
