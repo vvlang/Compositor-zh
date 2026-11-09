@@ -3,13 +3,13 @@
   <channel>
     <title>Compositor 中文版</title>
     <item>
-      <title>Version 1.6.4</title>
-      <pubDate>Thu, 05 Nov 2026 02:53:23 +0000</pubDate>
-      <sparkle:version>63</sparkle:version>
-      <sparkle:shortVersionString>1.6.4</sparkle:shortVersionString>
+      <title>Version 1.6.6</title>
+      <pubDate>Mon, 09 Nov 2026 02:41:18 +0000</pubDate>
+      <sparkle:version>65</sparkle:version>
+      <sparkle:shortVersionString>1.6.6</sparkle:shortVersionString>
       <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
-      <link>https://github.com/vvlang/Compositor-zh/releases/tag/v1.6.4</link>
-      <enclosure url="https://github.com/vvlang/Compositor-zh/releases/download/v1.6.4/Compositor-1.6.4.dmg" sparkle:edSignature="X+kR7WblkDKGQx6D+l820ku7XzXF+0JRODdnNhfNspowU5HnJaM+XeH+I9Am/k5td47SOm3cwwIJvlie+aM+Dg==" length="11630085" type="application/octet-stream"/>
+      <link>https://github.com/vvlang/Compositor-zh/releases/tag/v1.6.6</link>
+      <enclosure url="https://github.com/vvlang/Compositor-zh/releases/download/v1.6.6/Compositor-1.6.6.dmg" sparkle:edSignature="MADoXEFcZDfnnnExkZ7JV77N8+uS8iE4GFwcZluy/5XHt2+14AX7Fwn1r9xYC0AMRlEvofiiQp1zKkT+9OSaAw==" length="11679609" type="application/octet-stream"/>
     </item>
   </channel>
 </rss>
