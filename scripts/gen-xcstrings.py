@@ -227,17 +227,28 @@ def extract_base_keys() -> set[str]:
     L10n 的三个取词函数是我们自己的包装,苹果不认识,必须用 -s 登记,
     否则里面所有的字面量都会被漏掉(而且不会报错,只是静默查不到表)。
     """
-    with tempfile.TemporaryDirectory() as tmp:
-        subprocess.run(
-            ["xcrun", "xcstringstool", "extract",
-             "--SwiftUI", "--modern-localizable-strings",
-             "-s", "L10n.string", "-s", "L10n.name", "-s", "L10n.text",
-             "--output-format", "xcstrings",
-             "--output-directory", tmp, *swift_sources()],
-            cwd=ROOT, check=True, capture_output=True, text=True,
-        )
-        extracted = json.loads((Path(tmp) / "Localizable.xcstrings").read_text())
-    return set(extracted.get("strings", {}))
+    try:
+        with tempfile.TemporaryDirectory() as tmp:
+            subprocess.run(
+                ["xcrun", "xcstringstool", "extract",
+                 "--SwiftUI", "--modern-localizable-strings",
+                 "-s", "L10n.string", "-s", "L10n.name", "-s", "L10n.text",
+                 "--output-format", "xcstrings",
+                 "--output-directory", tmp, *swift_sources()],
+                cwd=ROOT, check=True, capture_output=True, text=True,
+            )
+            extracted = json.loads((Path(tmp) / "Localizable.xcstrings").read_text())
+        return set(extracted.get("strings", {}))
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        # 回退到现有目录，让脚本不至于直接崩掉。但要出声：提取失败时目录是陈旧的，
+        # 上游新加的字符串不会被发现——而审计脚本比对的也是这个陈旧目录，于是
+        # 照样显示「目录与源码一致」。不提示的话就是无声无息的静默失效。
+        print("⚠ xcstringstool 提取失败，改用现有目录。", file=sys.stderr)
+        print("  新增的字符串可能没被发现，审计的比对结果也不可信。", file=sys.stderr)
+        if CATALOG.exists():
+            extracted = json.loads(CATALOG.read_text(encoding="utf-8"))
+            return set(extracted.get("strings", {}))
+        raise
 
 
 def load_json(name: str) -> dict:

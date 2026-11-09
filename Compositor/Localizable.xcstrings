@@ -4038,17 +4038,6 @@
         }
       }
     },
-    "Export JPEG…": {
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "导出 JPEG…"
-          }
-        }
-      }
-    },
     "Export PNG": {
       "extractionState": "manual",
       "localizations": {
