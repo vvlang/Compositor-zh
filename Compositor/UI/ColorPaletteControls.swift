@@ -89,7 +89,7 @@ struct ColorPaletteControls: View {
         }
     }
     private func swatch(background: Bool) -> some View {
-        let label = background ? "Background color" : "Foreground color"
+        let label = background ? L10n.string("Background color") : L10n.string("Foreground color")
         return Button {
             if session.isMaskSelected { choosingMaskBackground = background }
             else { session.openColorPicker(background: background) }

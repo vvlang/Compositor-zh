@@ -826,6 +826,17 @@
         }
       }
     },
+    "Background color": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "背景色"
+          }
+        }
+      }
+    },
     "Balance": {
       "extractionState": "manual",
       "localizations": {
@@ -10887,6 +10898,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "平滑圆角"
+          }
+        }
+      }
+    },
+    "Smooth edges; turn off for hard pixel edges, like a pencil": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "平滑边缘；关闭则为硬像素边缘，像铅笔"
           }
         }
       }
