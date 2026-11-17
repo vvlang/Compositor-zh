@@ -209,6 +209,19 @@ final class EditorSession {
     /// The image file the document began as, opened or dropped into an empty window: until the document is saved as a
     /// project, Export offers that file's name, folder and format, so editing a PNG and writing it back is quick.
     @ObservationIgnored var sourceImageURL: URL?
+    /// Where the Layers panel is in its window (top-left origin): a layer dragged in the list stays in the list until
+    /// the pointer leaves the panel.
+    @ObservationIgnored var layersPanelFrame: CGRect = .zero
+    /// Where the panel's blend and opacity controls are, likewise: a row dragged up over them stays the list's, and
+    /// above them it leaves the list.
+    @ObservationIgnored var layerControlsFrame: CGRect = .zero
+    /// A layer drag is under way that may leave the list for the system's drag (above the panel's controls, or out of
+    /// the panel): set as the row is picked up, so the controls are ready to take it back for the list if it returns
+    /// over them (`LayerDropForwarder`), and cleared as it ends.
+    var layerDragIsOutside = false
+    /// The list, and the dragged row as it draws it, for `LayerDropForwarder`.
+    @ObservationIgnored weak var layerList: NSTableView?
+    @ObservationIgnored var layerDragImage: NSImage?
     /// Blocks overlapping edits immediately. Not observed by the UI: controls only dim via
     /// `showsBusy`, after an operation has run long enough to be worth showing, so quick
     /// edits (invert, fills, stroke commits) never flash the interface.
@@ -285,7 +298,7 @@ final class EditorSession {
     @ObservationIgnored var snapGuides: (xs: [CGFloat], ys: [CGFloat]) = ([], [])
     /// Pixel gaps the Move tool shows while a layer is dragged, or with Command held over another layer.
     @ObservationIgnored var distanceLines: [DistanceLine] = []
-    /// A Move tool resize in progress: the layer's size, and where the pointer has the handle, in document pixels.
+    /// A Move tool resize or rotation in progress: the layer's size or angle, and where the pointer is, in document pixels.
     @ObservationIgnored var resizeSize: (text: String, corner: CGPoint)?
     /// Crop, resize and selection moves follow View › Snap (⇧⌘;) too: they had a Snap item of their own, which left
     /// the View menu with two called Snap.
