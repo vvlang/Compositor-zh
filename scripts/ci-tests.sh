@@ -15,7 +15,9 @@ XCTESTRUN=$(ls "$DERIVED"/Build/Products/*.xctestrun 2>/dev/null | head -1)
 
 FILTER_SUITES=(CameraRawTests CameraRawSliderTests HueSaturationTests ImageAdjustmentTests LevelsTests FilterTests
   ScanlinesTests FinishingFilterTests)
-WINDOW_SUITES=(FloatingPanelTests SliderSnapTests)
+# 只列还存在的套件：上游在 1.6.5 删掉了 SliderSnapTests，-only-testing 一个
+# 不存在的套件会匹配到零个用例，窗口组就悄悄空跑了。
+WINDOW_SUITES=(FloatingPanelTests)
 # About half of the rest, alternating down the suites by size so neither half gets all the big ones.
 FIRST_SUITES=(PSDRoundTripTests LayerTests SelectionTests SelectionEditTests TransformTests TiledLayerTests
   AdjustmentLayerTests GuideTests SelectionClipboardTests ImageImportTests CompositorTests ExternalChangeTests
