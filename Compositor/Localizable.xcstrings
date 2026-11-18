@@ -2168,6 +2168,28 @@
         }
       }
     },
+    "Color of the next line": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下一条线的颜色"
+          }
+        }
+      }
+    },
+    "Color of the selected line": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所选直线的颜色"
+          }
+        }
+      }
+    },
     "Color that fills transparent areas": {
       "extractionState": "manual",
       "localizations": {
@@ -2780,6 +2802,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "虚线"
+          }
+        }
+      }
+    },
+    "Dashes of the selected line; they grow with its width": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所选直线的虚线；随线宽变粗"
           }
         }
       }
@@ -4159,6 +4192,17 @@
         }
       }
     },
+    "Fill": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "填充"
+          }
+        }
+      }
+    },
     "Fill Text": {
       "extractionState": "manual",
       "localizations": {
@@ -4177,6 +4221,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "填充"
+          }
+        }
+      }
+    },
+    "Fill color of the selected shape": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所选形状的填充颜色"
           }
         }
       }
@@ -5695,6 +5750,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "空气有多浑：雾气被灯光照亮，主体前方较薄"
+          }
+        }
+      }
+    },
+    "How this line's ends are finished": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这条线的端点如何收尾"
           }
         }
       }
@@ -9978,6 +10044,17 @@
         }
       }
     },
+    "Round this rectangle's corners by this many pixels; 0 keeps them square": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按此像素数圆化这个矩形的角；0 保持直角"
+          }
+        }
+      }
+    },
     "Roundness": {
       "extractionState": "manual",
       "localizations": {
@@ -10392,6 +10469,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "选择这个取样颜色。"
+          }
+        }
+      }
+    },
+    "Set a radius above 0 to use smooth corners.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "把半径设到 0 以上才能使用平滑圆角。"
           }
         }
       }
@@ -11342,6 +11430,28 @@
         }
       }
     },
+    "Stroke color": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "描边颜色"
+          }
+        }
+      }
+    },
+    "Stroke drawn inside the shape, in pixels. 0 draws none": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "描边画在形状内侧，以像素计。0 表示不画"
+          }
+        }
+      }
+    },
     "Strong Contrast": {
       "extractionState": "manual",
       "localizations": {
@@ -12240,6 +12350,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "网格线间距 %@–%@ 像素，分段 %@–%@ 段，且不超过网格线之间的像素数。"
+          }
+        }
+      }
+    },
+    "Use smooth squircle corners at 60% smoothing, matching Figma's iOS setting": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用 60% 平滑度的 squircle 圆角，与 Figma 的 iOS 设置一致"
           }
         }
       }

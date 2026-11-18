@@ -1254,9 +1254,18 @@ final class CanvasView: NSView {
         }
         // The shape being dragged out previews where its layer will go — above the active layer — rather than over
         // everything, so the layers above it cover it as they will once it is made.
+        // Over the top of a clipping stack, the new layer won't be clipped, so the shape previews above the whole stack,
+        // unclipped, rather than clipped and then showing in full on release.
+        let renderIDs = document.renderLayers.map(\.id)
+        let stackTop: (base: UUID, top: UUID)? = {
+            guard let active = session.activeLayer, let base = active.maskSourceID,
+                  let index = renderIDs.firstIndex(of: active.id) else { return nil }
+            let next = renderIDs.indices.contains(index + 1) ? byID[renderIDs[index + 1]] : nil
+            return next?.maskSourceID == base && next?.parentID == active.parentID ? nil : (base, active.id)
+        }()
         func drawOwnWithDraft(_ id: UUID, _ context: CGContext) {
             drawOwn(id, context)
-            guard id == session.activeLayerID else { return }
+            guard id == session.activeLayerID, stackTop?.top != id else { return }
             drawShapeDraft(scale: scale, center: center, in: context)
             drawNewText(context)
         }
@@ -1304,7 +1313,13 @@ final class CanvasView: NSView {
             let clip = FolderMaskClip(image: displayImage(mask.asset.image, width: transform.size.width * scale, in: context), transform: transform)
             let origin = center(transform.center)
             return { clip.apply(scale: scale, center: origin, in: $0) }
-        }, in: context) { live.drawComposite($0, in: context) }
+        }, in: context) { id in
+            live.drawComposite(id, in: context)
+            if let stackTop, id == stackTop.base {
+                drawShapeDraft(scale: scale, center: center, in: context)
+                drawNewText(context)
+            }
+        }
         drawNewText(context)
     }
 
@@ -1350,17 +1365,20 @@ final class CanvasView: NSView {
         let rect = CGRect(x: middle.x - draft.rect.width * scale / 2, y: middle.y - draft.rect.height * scale / 2,
                           width: draft.rect.width * scale, height: draft.rect.height * scale)
         context.saveGState()
-        context.setFillColor(session.foregroundColor.nsColor.cgColor)
+        context.setFillColor(draft.fill.nsColor.cgColor)
         if draft.kind == .line {
             guard let ends = session.shapeLineEnds else { context.restoreGState(); return }
-            let thickness = max(1, CGFloat(session.shapeLineWidth) * scale)
-            context.setStrokeColor(session.foregroundColor.nsColor.cgColor)
+            let thickness = max(1, draft.lineWidth * scale)
+            context.setStrokeColor(draft.fill.nsColor.cgColor)
             // Exactly the two points being dragged between, so the start never shifts.
             context.strokeShapeLine(from: center(ends.start), to: center(ends.end), width: thickness,
                                     style: draft.lineStyle, cap: draft.lineCap)
         } else {
-            context.addPath(draft.kind.path(in: rect, cornerRadius: draft.cornerRadius * scale, smoothing: draft.smoothing))
-            context.fillPath()
+            // The same inside stroke the finished shape gets, so it shows while the box is still being dragged rather
+            // than only once the mouse is released.
+            let path = draft.kind.path(in: rect, cornerRadius: draft.cornerRadius * scale, smoothing: draft.smoothing)
+            EditorSession.fillShape(path, color: draft.fill.nsColor.cgColor, stroke: draft.strokeColor.nsColor.cgColor,
+                                    strokeWidth: min(draft.strokeWidth * scale, min(rect.width, rect.height) / 2), in: context)
         }
         context.restoreGState()
     }
@@ -2453,10 +2471,13 @@ final class CanvasView: NSView {
             session.nudgeSelection(dx: event.keyCode == 123 ? -step : event.keyCode == 124 ? step : 0,
                                    dy: event.keyCode == 126 ? -step : event.keyCode == 125 ? step : 0)
         } else if session.tool == .move, [123, 124, 125, 126].contains(event.keyCode),
-                  event.modifierFlags.intersection([.command, .control, .option]).isEmpty {
+                  event.modifierFlags.intersection([.command, .control]).isEmpty {
+            // Shift for 10 px; Option moves a copy, leaving the layer where it was.
             let step: CGFloat = event.modifierFlags.contains(.shift) ? 10 : 1
-            session.nudgeLayer(dx: event.keyCode == 123 ? -step : event.keyCode == 124 ? step : 0,
-                               dy: event.keyCode == 126 ? -step : event.keyCode == 125 ? step : 0)
+            let dx: CGFloat = event.keyCode == 123 ? -step : event.keyCode == 124 ? step : 0
+            let dy: CGFloat = event.keyCode == 126 ? -step : event.keyCode == 125 ? step : 0
+            if event.modifierFlags.contains(.option) { session.duplicateAndNudgeLayer(dx: dx, dy: dy) }
+            else { session.nudgeLayer(dx: dx, dy: dy) }
         } else if (event.keyCode == 51 || event.keyCode == 117),
            event.modifierFlags.intersection([.command, .control, .option]).isEmpty {
             session.deleteKeyPressed()
@@ -2953,7 +2974,7 @@ extension CanvasView {
     /// The shape being dragged out, drawn by `drawShapeDraft` into a bitmap just big enough for it, in frame pixels.
     private func shapeDraftImage(placement: GPUPlacement) -> CIImage? {
         guard let draft = session.shapeDraft, let renderer = GPUCanvasRenderer.shared else { return nil }
-        let reach = CGFloat(session.shapeLineWidth) * placement.scale + 4
+        let reach = (draft.kind == .line ? draft.lineWidth * placement.scale : 0) + 4
         let box = draft.rect.applying(placement.mapping).insetBy(dx: -reach, dy: -reach).integral
         guard box.width >= 1, box.height >= 1, box.width * box.height <= DocumentLimits.maxSurfaceExtent,
               let context = try? BrushRaster.context(width: Int(box.width), height: Int(box.height), mask: false) else { return nil }
@@ -3549,11 +3570,13 @@ extension CanvasView {
                         prints.append("layer \(childID) \(session.displayedBlendMode(for: child))")
                         group = GPUBlend.blend(image, over: group, mode: session.displayedBlendMode(for: child))
                     } else if unsupported { return nil }
-                    group = drafts(after: childID, over: group)
+                    // Over the top of the stack, the new layer won't be clipped: it goes over the stack, below.
+                    if childID != children.last { group = drafts(after: childID, over: group) }
                 }
                 let stack = group.applyingFilter("CIBlendWithAlphaMask", parameters: [kCIInputBackgroundImageKey: CIImage.empty(),
                                                                                        kCIInputMaskImageKey: base])
                 result = GPUBlend.blend(clippedByFolders(id, stack), over: result, mode: mode)
+                if let top = children.last { result = drafts(after: top, over: result) }
                 continue
             }
             // A layer masked by another's coverage, outside a clipping stack.
