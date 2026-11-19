@@ -1453,6 +1453,17 @@
         }
       }
     },
+    "Changes": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更改内容"
+          }
+        }
+      }
+    },
     "Channel": {
       "extractionState": "manual",
       "localizations": {
@@ -6436,6 +6447,17 @@
         }
       }
     },
+    "Layers, folders and masks kept · sRGB": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保留图层、文件夹与蒙版 · sRGB"
+          }
+        }
+      }
+    },
     "Leading": {
       "extractionState": "manual",
       "localizations": {
@@ -8537,13 +8559,13 @@
         }
       }
     },
-    "Other formats: TIFF, PDF and GIF%@, and Channel Pack for game textures": {
+    "Other formats: TIFF, PDF and GIF%@, Channel Pack for game textures, and PSD to keep the layers for Photoshop": {
       "extractionState": "extracted",
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "其他格式：TIFF、PDF 和 GIF%@，以及用于游戏贴图的通道打包"
+            "value": "其他格式：TIFF、PDF 和 GIF%@，用于游戏贴图的通道打包，以及为 Photoshop 保留图层的 PSD"
           }
         }
       }
