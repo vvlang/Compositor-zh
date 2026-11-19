@@ -84,7 +84,10 @@ struct PSDExportTests {
         #expect(imported.layers.first { $0.name == "Green" }?.maskSourceID == importedRed.id)
         #expect(importedRed.mask != nil)
         #expect(imported.conversions.isEmpty, "\(imported.conversions.map(\.message))")
-        #expect(PSDWriter.summary(PSDWriter.notes(for: snapshot)) == "Adjustment layers left out: “Levels”")
+        // summary 是显示值（走目录），断言按同一条插值路径拼：中文进程比中文，
+        // 英文进程比英文。直接比英文字面量在汉化后必然红。
+        #expect(PSDWriter.summary(PSDWriter.notes(for: snapshot))
+                == L10n.string("Adjustment layers left out: \("“Levels”")"))
     }
 
     @Test func otherAppsSeeTheFlattenedPicture() async throws {
