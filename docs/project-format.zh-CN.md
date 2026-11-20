@@ -1,10 +1,10 @@
-# Compositor 工程格式，版本 1–18
+# Compositor 工程格式，版本 1–22
 
 > 🌐 **English**：[docs/project-format.md](docs/project-format.md) ｜ 简体中文（当前文件）
 
 `.comp` 文件是一个 macOS 文档包，其中包含 `manifest.json` 和一个 `images/` 目录，目录内是按 `<layer UUID>.png` 命名的资产。
 
-manifest 标识为 `com.compositor.project`，新保存的版本号为 `18`（版本 `1`–`17` 仍然可读），采用 sRGB 工作色彩空间。它存储文档 UUID、像素尺寸、激活图层 UUID，以及从下到上排列的图层。每个图层存储 UUID、名称、可见性、变换（origin、size、顺时针旋转、翻转、采样方式）以及可选的图像文件名。空白图层没有图像资产。
+manifest 标识为 `com.compositor.project`，新保存的版本号为 `22`（版本 `1`–`21` 仍然可读），采用 sRGB 工作色彩空间。它存储文档 UUID、像素尺寸、激活图层 UUID，以及从下到上排列的图层。每个图层存储 UUID、名称、可见性、变换（origin、size、顺时针旋转、翻转、采样方式）以及可选的图像文件名。空白图层没有图像资产。
 
 内嵌的 PNG 保留源像素和透明度；变换信息独立存储。工程在被移动或删除导入的源照片后仍能存活。保存采用协调的原子包替换。在替换活动文档之前，不支持的版本、无效的元数据、缺失的资源、不安全的路径以及过大的数据都会被拒绝。
 
@@ -43,7 +43,7 @@ UI 术语：这些 alpha 链接就是剪贴蒙版。Option 点击可以为下方
 较新的字段是可选的，且不以版本号作为门槛；旧读取器会忽略这些字段并保持像素或链接的蒙版不变：
 
 - `maskPlacement` 与 `maskLinked`：未链接的蒙版（`maskLinked` 为 false；缺失表示已链接）将其自身变换保留在 `maskPlacement`（一个文档空间的矩形，类似图层变换）中，不再跟随图层移动。两者都需要 `maskFile`。
-- `shape`：使用形状工具创建的图层保留其样式（`kind`、`red`/`green`/`blue`、圆角半径 `cornerRadius`（文档像素），以及线条的 `lineWidth` 与 `start`/`end`（占图层框的比例）），以便在缩放时干净地重绘。其 PNG 仍是普通光栅图像；一旦其他任何东西更改这些像素，元数据就会被丢弃。
+- `shape`：使用形状工具创建的图层保留其样式（`kind`、`red`/`green`/`blue`、圆角半径 `cornerRadius`（文档像素），以及线条的 `lineWidth` 与 `start`/`end`（占图层框的比例），以及矩形和椭圆可选的内描边 `strokeWidth` 与 `strokeRed`/`strokeGreen`/`strokeBlue`（版本 22）），以便在缩放时干净地重绘。其 PNG 仍是普通光栅图像；一旦其他任何东西更改这些像素，元数据就会被丢弃。
 
 ### 可编辑文字
 
@@ -66,3 +66,11 @@ UI 术语：这些 alpha 链接就是剪贴蒙版。Option 点击可以为下方
 版本 17 允许图像图层是动画 GIF，通过可选的 `gif` 对象实现（组、调整图层、文字与形状都不能带它）。`sourceFile` 是 `images/` 下的 `<layer UUID>.gif`，原封不动保留原始 GIF；`selectedFrameIndex` 是当前显示的那一帧，它的像素放在该图层普通的 `imageFile` 里；图层的变换、不透明度、效果与蒙版作用于每一帧。可选字段：`geometry`（图像大小的输出 `width` 与 `height`，以及从源图归一化坐标到输出坐标的仿射映射 `a`、`b`、`c`、`d`、`tx`、`ty`，可选带 `sampling`）、`framePixels`（编辑过的帧，每帧 `{ "index": 1, "imageFile": "<layer UUID>.frame-1.png" }`；其余帧从源文件解码）、`deletedFrameIndices`（被删掉的源帧）、`frameOrder`（播放顺序，每帧 `{ "index": 4, "sourceIndex": 1 }`；复制出来的帧取源帧数以上的下标，低于 8,192）与 `timing`（`mode` 为 `Frame delay` 或 `Same for all`，`uniformDelay` 以秒计，`frameDelays` 覆盖 `{ "index": 4, "duration": 0.16 }`；延时为 0.02–655.35 秒）。一个 GIF 最多 4,096 帧。声明版本 1–16 的文件不能包含 `gif`，旧版本应用会拒绝版本 17。
 
 版本 18 从滤镜菜单增加了三种调整类型：`Vignette`、`Lens Effects` 与 `Tonal Contrast`。每一种都把自己的设置放在该调整的 `filterLayerSettings` 里独立的对象中：`vignette`（`amount` 0–100、`color`（含 `red`、`green`、`blue` 0–1）、`midpoint` 0–100、`roundness` −100–100、`feather` 0–100、`highlights` 0–100；它给整个画布加边框，只给已在那里的像素重新着色）、`tonal`（`amount` 0–100、`radius` 1–100 文档像素、`shadows`、`midtones`、`highlights` −100–100）与 `lens`（`effect` 为 `Anamorphic Flare`、`Starburst`、`Mist`、`Prism` 或 `Bokeh`，并带该效果自己的设置：`threshold` 50–100；`flareAmount` 0–100、`flareLength` 1–100 与 `flareBlue` 0–100；`starAmount` 0–100、`starLength` 2–40、`starPoints` 4、6、8、12 或 14、`starAngle` −180–180；`mistStrength` 与 `mistSize` 0–100；`prismAmount` 0–100、`prismCopies` 1–8、`prismOffset` 0–50、`prismAngle` −180–180、`prismBothWays`、`prismBlur` 0–100；`bokehRadius` 0.5–6、`bokehBrightness` 与 `bokehRing` 0–100、`bokehShape` 为 `Round`、`Hexagon`、`Oval` 或 `Cat's Eye`）。以百分比给出的长度都是文档长边的百分比。`lens` 里任何一项设置都可以省略，省略即取默认值。声明版本 1–17 的文件不能包含这些类型或这些对象，旧版本应用会拒绝版本 18。
+
+版本 19 增加了 `Sharpen` 调整类型：一种反锐化掩模（USM），它的设置放在该调整 `filterLayerSettings` 里的 `sharpen` 对象中，`amount` 0–300（加回细节的百分比）与 `radius` 0.1–20 文档像素。声明版本 1–18 的文件不能包含它，旧版本应用会拒绝版本 19。
+
+版本 20 给 `lens` 设置增加了 `prismFringe` 0–100：Prism 把每个副本的红蓝分开多远，以文档长边的百分之一为单位（0 表示副本保持锐利）。缺失时取 30，也就是早先版本一直画出的分离度。旧版本应用会拒绝版本 20。
+
+版本 21 增加了 `Reduce Noise` 调整类型，它的设置放在该调整 `filterLayerSettings` 里的 `reduceNoise` 对象中：`strength`（从亮度里平滑掉多少噪点）、`details`（从中保留多少纹理）与 `color`（平滑掉多少彩色斑点），每个 0–100。声明版本 1–20 的文件不能包含它，旧版本应用会拒绝版本 21。
+
+版本 22 允许矩形或椭圆在其 `shape` 样式上带内描边：`strokeWidth` 以文档像素计（大于 0，最多 5000），以及 `strokeRed`、`strokeGreen`、`strokeBlue`（0–1）。描边画在形状框的内部，所以图层保持拖出来时的大小，而描边宽度与圆角半径一样，在形状被缩放时仍以文档像素计。缺失即没有描边。线条不能带这些字段。声明版本 1–21 的文件不能包含它们，旧版本应用会拒绝版本 22。
