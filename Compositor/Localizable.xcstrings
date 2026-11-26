@@ -4753,6 +4753,17 @@
         }
       }
     },
+    "Grab Frame": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "抓取帧"
+          }
+        }
+      }
+    },
     "Gradient": {
       "extractionState": "manual",
       "localizations": {
@@ -7756,6 +7767,17 @@
         }
       }
     },
+    "Movie playhead": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "影片播放头"
+          }
+        }
+      }
+    },
     "Multiply": {
       "extractionState": "manual",
       "localizations": {
@@ -7763,6 +7785,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "正片叠底"
+          }
+        }
+      }
+    },
+    "Mute movie": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "影片静音"
           }
         }
       }
@@ -9655,6 +9688,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "释放剪贴蒙版"
+          }
+        }
+      }
+    },
+    "Relink…": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新链接…"
           }
         }
       }
@@ -12317,6 +12361,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "取消链接蒙版：%@"
+          }
+        }
+      }
+    },
+    "Unmute movie": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取消影片静音"
           }
         }
       }

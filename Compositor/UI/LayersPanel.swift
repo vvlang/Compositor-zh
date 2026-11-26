@@ -78,6 +78,7 @@ private struct LayersUnavailableView<Content: View>: View {
 
 /// The buttons under the layers: new layer, folder, mask, adjustment and filter layers, effects, and delete.
 struct LayersFooter: View {
+    static let height: CGFloat = 48
     let session: EditorSession
 
     var body: some View {
@@ -114,6 +115,7 @@ struct LayersFooter: View {
         }
         .buttonStyle(.plain).foregroundStyle(.secondary)
         .padding(.horizontal, 8).padding(.vertical, 4) // Plus the hit areas' 8 and 12: the original 16.
+        .frame(height: Self.height)
     }
 
     /// 底部垃圾桶针对什么，取决于当前选中的是效果、蒙版还是图层。拆成属性而不是
