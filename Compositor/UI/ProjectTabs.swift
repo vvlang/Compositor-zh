@@ -281,9 +281,9 @@ private struct OverflowTabsPill: View {
         }
         .padding(.horizontal, 11)
         .frame(height: 28)
+        .foregroundStyle(EditorToolbarPillStyle.inactiveTabText)
         .opacity(workspace.canSwitch ? 1 : 0.5)
-        .background(Color.white.opacity(0.035), in: Capsule())
-        .overlay(Capsule().strokeBorder(Color.white.opacity(0.08), lineWidth: 1))
+        .background(EditorToolbarPillStyle.inactiveTabFill, in: Capsule())
         // A SwiftUI Menu draws its own label, chevron first; this keeps the pill reading "3 more tabs ⌄".
         .overlay(OverflowMenuAnchor(label: label) {
             guard workspace.canSwitch else { return [] }
@@ -334,12 +334,34 @@ private struct OverflowMenuAnchor: NSViewRepresentable {
     }
 }
 
+struct EditorToolbarPillStyle: ButtonStyle {
+    static let fill = Color(white: 0.19)
+    static let inactiveTabFill = Color(.sRGB, white: 45.0 / 255.0)
+    static let inactiveTabText = Color.secondary.opacity(0.85)
+    var circular = false
+    @Environment(\.isEnabled) private var enabled
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.system(size: 13, weight: .medium))
+            .frame(minWidth: circular ? 28 : 42)
+            .frame(height: 28)
+            .foregroundStyle(enabled ? Color.primary : Color.secondary)
+            .background(configuration.isPressed ? Color(white: 0.25) : Self.fill, in: Capsule())
+            .contentShape(Capsule())
+    }
+}
+
 private struct ProjectTabButton: View {
     let workspace: ProjectWorkspace
     let tab: ProjectTab
     let onReorder: (TabDragPhase) -> Void
     @State private var targeted = false
     private var active: Bool { workspace.selectedID == tab.id }
+    private var tabFill: Color {
+        if targeted { return Color.accentColor.opacity(0.3) }
+        return active ? EditorToolbarPillStyle.fill : EditorToolbarPillStyle.inactiveTabFill
+    }
     var body: some View {
         HStack(spacing: 0) {
             Button { workspace.select(tab.id) } label: {
@@ -365,7 +387,8 @@ private struct ProjectTabButton: View {
             // The only tab, still blank, has nothing to close: no button, and the pill closes up around its name.
             if workspace.canClose(tab) {
                 Button { Task { await workspace.close(tab.id) } } label: {
-                    Image(systemName: "xmark").font(.system(size: 9, weight: .semibold)).foregroundStyle(.secondary)
+                    Image(systemName: "xmark").font(.system(size: 9, weight: .semibold))
+                        .foregroundStyle(active ? Color.secondary : EditorToolbarPillStyle.inactiveTabText)
                         .frame(width: 16, height: 28)
                         .padding(.trailing, 5)
                         .contentShape(Rectangle())
@@ -374,8 +397,9 @@ private struct ProjectTabButton: View {
             }
         }
         .frame(height: 28)
-        .background(targeted ? Color.accentColor.opacity(0.3) : Color.white.opacity(active ? 0.12 : 0.035), in: Capsule())
-        .overlay(Capsule().strokeBorder(targeted ? Color.accentColor : Color.white.opacity(active ? 0.22 : 0.08), lineWidth: targeted ? 2 : 1))
+        .foregroundStyle(active ? Color.primary : EditorToolbarPillStyle.inactiveTabText)
+        .background(tabFill, in: Capsule())
+        .overlay(Capsule().strokeBorder(targeted ? Color.accentColor : .clear, lineWidth: 2))
         // 非目标态只显示工程名，而工程名是用户的数据，不该进目录。
         .help(targeted ? L10n.string("Add to \(tab.title)") : tab.title)
         .onDrop(of: [UTType.fileURL.identifier, UTType.image.identifier, ProjectWorkspace.layerType], delegate:
